@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le Rêve Étrange</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Georgia', serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    overflow: hidden;
+    transition: background 2s ease;
+  }
+
+  .step {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    width: 100%;
+    padding: 40px 20px;
+  }
+
+  .step.active {
+    display: flex;
+    animation: fadeIn 2s ease-in forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ===== ETAPE 1 — Le Feywild ===== */
+  .bg-fey {
+    background: linear-gradient(to bottom, #0d1a2e 0%, #142638 30%, #0f2a1f 70%, #0a1f15 100%);
+    color: #c8dcc0;
+  }
+
+  .fireflies {
+    position: fixed;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .firefly {
+    position: absolute;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #d4e89c;
+    box-shadow: 0 0 8px #d4e89c, 0 0 20px rgba(212,232,156,0.4);
+    animation: fireflyDrift 7s ease-in-out infinite;
+  }
+
+  .firefly:nth-child(1) { top: 15%; left: 8%; animation-delay: 0s; animation-duration: 6s; }
+  .firefly:nth-child(2) { top: 55%; left: 85%; animation-delay: 1.2s; animation-duration: 8s; }
+  .firefly:nth-child(3) { top: 35%; left: 45%; animation-delay: 2.5s; animation-duration: 5s; }
+  .firefly:nth-child(4) { top: 70%; left: 20%; animation-delay: 0.5s; animation-duration: 7s; }
+  .firefly:nth-child(5) { top: 25%; left: 70%; animation-delay: 3s; animation-duration: 9s; }
+  .firefly:nth-child(6) { top: 80%; left: 55%; animation-delay: 1.8s; animation-duration: 6.5s; }
+  .firefly:nth-child(7) { top: 45%; left: 12%; animation-delay: 4s; animation-duration: 7.5s; }
+
+  @keyframes fireflyDrift {
+    0%, 100% { transform: translate(0, 0); opacity: 0.3; }
+    25% { transform: translate(15px, -20px); opacity: 1; }
+    50% { transform: translate(-10px, -10px); opacity: 0.6; }
+    75% { transform: translate(20px, 10px); opacity: 1; }
+  }
+
+  /* ===== ETAPE 2 — La Rupture ===== */
+  .bg-rupture {
+    background: linear-gradient(to bottom, #0f2a1f 0%, #3a3a38 40%, #5a5550 100%);
+    color: #a0a098;
+  }
+
+  .color-drain {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    background: radial-gradient(ellipse at center, transparent 30%, rgba(60,60,55,0.3) 100%);
+  }
+
+  /* ===== ETAPE 3 — Les Chaînes ===== */
+  .bg-chaines {
+    background: #1a1a18;
+    color: #8a8880;
+  }
+
+  .cage-bars {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    display: flex;
+    justify-content: space-around;
+    align-items: stretch;
+  }
+
+  .bar {
+    width: 2px;
+    background: linear-gradient(to bottom, rgba(100,95,85,0.15), rgba(100,95,85,0.05), rgba(100,95,85,0.15));
+  }
+
+  /* ===== ETAPE 4 — La Libération ===== */
+  .bg-libre {
+    background: linear-gradient(to bottom, #1a1a18 0%, #2a2820 50%, #3a3828 100%);
+    color: #b0a890;
+  }
+
+  /* ===== ETAPE 5 — Le Monde ===== */
+  .bg-monde {
+    background: linear-gradient(to bottom, #3a3828 0%, #5a5545 40%, #7a7565 100%);
+    color: #3a3530;
+  }
+
+  .skyline {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 90px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 8px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .building {
+    background: rgba(40,35,30,0.3);
+    width: 26px;
+    border-radius: 2px 2px 0 0;
+  }
+
+  .cat-silhouette {
+    position: fixed;
+    bottom: 95px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.8rem;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.25;
+  }
+
+  .credentials {
+    margin-top: 40px;
+    padding: 25px 40px;
+    border: 1px solid rgba(80,75,65,0.4);
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(4px);
+    border-radius: 8px;
+    text-align: center;
+    z-index: 2;
+  }
+
+  .credentials h3 {
+    font-size: 1rem;
+    color: #6a6055;
+    margin-bottom: 15px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .cred-line {
+    font-size: 1rem;
+    margin: 8px 0;
+  }
+
+  .cred-line span {
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    background: rgba(100,90,80,0.15);
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+
+  /* ===== COMMUN ===== */
+  .text-block {
+    max-width: 600px;
+    text-align: center;
+    line-height: 1.8;
+    font-size: 1.1rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .bg-fey .text-block em { color: #a8d89a; }
+  .bg-rupture .text-block em { color: #8a8880; }
+  .bg-chaines .text-block em { color: #6a6860; }
+  .bg-libre .text-block em { color: #c8b890; }
+  .content-finale em { color: #5a5550; }
+
+  .input-zone {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+    z-index: 1;
+  }
+
+  input[type="text"] {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #555;
+    color: #ddd;
+    font-family: 'Georgia', serif;
+    font-size: 1rem;
+    padding: 8px 16px;
+    text-align: center;
+    width: 350px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .bg-fey input[type="text"]:focus { border-bottom-color: #a8d89a; }
+  .bg-rupture input[type="text"]:focus { border-bottom-color: #8a8880; }
+  .bg-chaines input[type="text"]:focus { border-bottom-color: #6a6860; }
+  .bg-libre input[type="text"]:focus { border-bottom-color: #c8b890; }
+
+  button {
+    background: transparent;
+    border: 1px solid #555;
+    color: #aaa;
+    font-family: 'Georgia', serif;
+    font-size: 0.95rem;
+    padding: 10px 30px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  button:hover { border-color: #a8d89a; color: #ddd; }
+
+  .error-msg {
+    font-style: italic;
+    font-size: 0.9rem;
+    min-height: 24px;
+  }
+
+  .bg-fey .error-msg { color: #5a7a50; }
+  .bg-rupture .error-msg { color: #6a6a60; }
+  .bg-chaines .error-msg { color: #5a5850; }
+  .bg-libre .error-msg { color: #8a7a60; }
+
+  .radio-zone {
+    margin-top: 35px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    z-index: 1;
+  }
+
+  .radio-zone label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+
+  .radio-zone label:hover { color: #ddd; }
+
+  input[type="radio"] {
+    accent-color: #a8d89a;
+    width: 16px; height: 16px;
+    cursor: pointer;
+  }
+
+  .letter-reveal {
+    display: none;
+    font-size: 3rem;
+    margin-top: 30px;
+    z-index: 1;
+  }
+
+  .letter-reveal.show {
+    display: block;
+    animation: letterGlow 2s ease-in forwards;
+  }
+
+  .bg-rupture .letter-reveal {
+    color: #a0a098;
+    text-shadow: 0 0 20px rgba(160,160,152,0.4);
+  }
+
+  .bg-chaines .letter-reveal {
+    color: #6a6860;
+    text-shadow: 0 0 20px rgba(106,104,96,0.4);
+  }
+
+  @keyframes letterGlow {
+    0% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  .next-text {
+    display: none;
+    margin-top: 20px;
+    font-style: italic;
+    color: #777;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: color 0.3s;
+    z-index: 1;
+  }
+
+  .next-text.show { display: block; }
+  .next-text:hover { color: #a8d89a; }
+
+  .assembly {
+    display: none;
+    margin-top: 40px;
+    text-align: center;
+    max-width: 550px;
+    line-height: 1.8;
+    z-index: 1;
+  }
+
+  .assembly.show { display: block; }
+  .assembly em { color: #c8b890; }
+
+  .flash-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  .flash-overlay.active-green {
+    animation: flashGreen 1.5s ease-out forwards;
+  }
+
+  .flash-overlay.active-grey {
+    animation: flashGrey 1.5s ease-out forwards;
+  }
+
+  .flash-overlay.active-warm {
+    animation: flashWarm 1.5s ease-out forwards;
+  }
+
+  @keyframes flashGreen {
+    0% { opacity: 0; background: #1a2a15; }
+    10% { opacity: 0.5; }
+    100% { opacity: 0; }
+  }
+
+  @keyframes flashGrey {
+    0% { opacity: 0; background: #4a4a48; }
+    10% { opacity: 0.5; }
+    100% { opacity: 0; }
+  }
+
+  @keyframes flashWarm {
+    0% { opacity: 0; background: #d4d0c0; }
+    10% { opacity: 0.5; }
+    100% { opacity: 0; }
+  }
+
+  .mushrooms {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 40px;
+    z-index: 1;
+  }
+
+  .mushroom {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    animation: mushroomGlow 3s ease-in-out infinite;
+  }
+
+  .mushroom:nth-child(1) { background: #a8d89a; animation-delay: 0s; }
+  .mushroom:nth-child(2) { background: #8acc7a; animation-delay: 0.5s; }
+  .mushroom:nth-child(3) { background: #b8e8aa; animation-delay: 1s; }
+  .mushroom:nth-child(4) { background: #90d085; animation-delay: 1.5s; }
+  .mushroom:nth-child(5) { background: #a0d890; animation-delay: 2s; }
+
+  @keyframes mushroomGlow {
+    0%, 100% { box-shadow: 0 0 5px currentColor; opacity: 0.4; }
+    50% { box-shadow: 0 0 15px currentColor, 0 0 30px currentColor; opacity: 1; }
+  }
+
+  /* Fade from color to grey */
+  .mushroom.fading {
+    animation: mushroomFade 3s ease-out forwards;
+  }
+
+  @keyframes mushroomFade {
+    0% { filter: saturate(1); }
+    100% { filter: saturate(0); background: #888; box-shadow: none; opacity: 0.3; }
+  }
+</style>
+</head>
+<body class="bg-fey">
+
+<div class="flash-overlay" id="flash"></div>
+
+<!-- Ambiance Feywild -->
+<div class="fireflies" id="fireflies">
+  <div class="firefly"></div>
+  <div class="firefly"></div>
+  <div class="firefly"></div>
+  <div class="firefly"></div>
+  <div class="firefly"></div>
+  <div class="firefly"></div>
+  <div class="firefly"></div>
+</div>
+
+<!-- Ambiance Rupture -->
+<div class="color-drain" id="colorDrain" style="display:none;"></div>
+
+<!-- Ambiance Chaînes -->
+<div class="cage-bars" id="cageBars" style="display:none;">
+  <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+  <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+  <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+  <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+</div>
+
+<!-- ==================== ETAPE 1 — Le Feywild ==================== -->
+<div class="step bg-fey active" id="step1">
+  <div class="mushrooms">
+    <div class="mushroom"></div>
+    <div class="mushroom"></div>
+    <div class="mushroom"></div>
+    <div class="mushroom"></div>
+    <div class="mushroom"></div>
+  </div>
+
+  <div class="text-block">
+    <em>Les arbres murmurent. Les lucioles dansent.</em><br>
+    <em>Le temps hesite a avancer.</em><br><br>
+    <em>Tu n'as jamais connu tes parents.</em><br>
+    <em>Mais tu as connu un cercle.</em><br><br>
+    <em>Quel est le nom complet du cercle qui t'a eleve ?</em>
+  </div>
+
+  <div class="input-zone">
+    <input type="text" id="ans1" placeholder="..." autocomplete="off">
+    <button onclick="check1()">Murmurer</button>
+    <div class="error-msg" id="err1"></div>
+  </div>
+</div>
+
+<!-- ==================== ETAPE 2 — La Rupture ==================== -->
+<div class="step bg-rupture" id="step2">
+  <div class="text-block">
+    <em>Tu as suivi des champignons phosphorescents.</em><br>
+    <em>Le monde a change.</em><br><br>
+    <em>Les couleurs sont devenues ternes.</em><br>
+    <em>Les sons ... lourds.</em><br>
+    <em>L'air ... silencieux.</em><br><br>
+    <em>Trois choses ont change en franchissant le seuil.</em><br>
+    <em>Remets-les dans l'ordre.</em>
+  </div>
+
+  <div class="radio-zone" id="orderZone">
+    <p style="font-style:italic; margin-bottom:10px; color:#8a8880;">Premier changement :</p>
+    <label><input type="radio" name="q2a" value="couleurs"> Les couleurs devinrent ternes</label>
+    <label><input type="radio" name="q2a" value="sons"> Les sons devinrent lourds</label>
+    <label><input type="radio" name="q2a" value="air"> L'air devint silencieux</label>
+
+    <p style="font-style:italic; margin-top:20px; margin-bottom:10px; color:#8a8880;">Deuxieme changement :</p>
+    <label><input type="radio" name="q2b" value="couleurs"> Les couleurs devinrent ternes</label>
+    <label><input type="radio" name="q2b" value="sons"> Les sons devinrent lourds</label>
+    <label><input type="radio" name="q2b" value="air"> L'air devint silencieux</label>
+
+    <p style="font-style:italic; margin-top:20px; margin-bottom:10px; color:#8a8880;">Troisieme changement :</p>
+    <label><input type="radio" name="q2c" value="couleurs"> Les couleurs devinrent ternes</label>
+    <label><input type="radio" name="q2c" value="sons"> Les sons devinrent lourds</label>
+    <label><input type="radio" name="q2c" value="air"> L'air devint silencieux</label>
+  </div>
+
+  <div class="input-zone" id="btn2">
+    <button onclick="check2()">Se souvenir</button>
+    <div class="error-msg" id="err2"></div>
+  </div>
+
+  <div class="letter-reveal" id="letter1">S</div>
+  <div class="next-text" id="next2" onclick="goStep(3)">
+    Retiens cette lettre. Avance. &#8594;
+  </div>
+</div>
+
+<!-- ==================== ETAPE 3 — Les Chaînes ==================== -->
+<div class="step bg-chaines" id="step3">
+  <div class="text-block">
+    <em>Tu as ete capture.</em><br>
+    <em>Pour eux, tu n'etais qu'un objet rare.</em><br><br>
+    <em>Qu'est-ce que ton cercle t'avait toujours appris a eviter ?</em><br>
+    <em>Ce que tu as ressenti pour la premiere fois entre ces murs ?</em>
+  </div>
+
+  <div class="radio-zone" id="radioZone3">
+    <label><input type="radio" name="q3" value="wrong1"> La colere</label>
+    <label><input type="radio" name="q3" value="correct"> La dissonance</label>
+    <label><input type="radio" name="q3" value="wrong2"> La peur</label>
+    <label><input type="radio" name="q3" value="wrong3"> Le silence</label>
+  </div>
+
+  <div class="input-zone" id="btn3">
+    <button onclick="check3()">Repondre</button>
+    <div class="error-msg" id="err3"></div>
+  </div>
+
+  <div class="letter-reveal" id="letter2">O</div>
+  <div class="next-text" id="next3" onclick="goStep(4)">
+    Une deuxieme lettre. Retiens-la. Avance. &#8594;
+  </div>
+</div>
+
+<!-- ==================== ETAPE 4 — La Libération ==================== -->
+<div class="step bg-libre" id="step4">
+  <div class="text-block">
+    <em>Deux inconnus ont brise tes chaines.</em><br>
+    <em>Brutaux, bruyants, imparfaits ... mais libres.</em><br><br>
+    <em>Le monde materiel est trop lourd, trop rigide.</em><br>
+    <em>Alors tu te caches dans une autre forme.</em><br><br>
+    <em>Quelle forme prends-tu pour te fondre dans le decor ?</em>
+  </div>
+
+  <div class="input-zone" id="input4a">
+    <input type="text" id="ans4a" placeholder="..." autocomplete="off">
+    <button onclick="check4a()">Repondre</button>
+    <div class="error-msg" id="err4a"></div>
+  </div>
+
+  <div class="assembly" id="assembly">
+    <em>Petit. Discret. Libre.</em><br><br>
+    <em>Assemble ce que le passage t'a laisse.</em><br>
+    <em>Les deux lettres, puis ta forme.</em><br>
+    <em>Sans espace, sans majuscule.</em>
+
+    <div class="input-zone">
+      <input type="text" id="ans4b" placeholder="..." autocomplete="off">
+      <button onclick="check4b()">Franchir le seuil</button>
+      <div class="error-msg" id="err4b"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ETAPE 5 — Le Monde ==================== -->
+<div class="step bg-monde" id="step5">
+  <div class="skyline">
+    <div class="building" style="height:50px;"></div>
+    <div class="building" style="height:70px;"></div>
+    <div class="building" style="height:38px;"></div>
+    <div class="building" style="height:82px;"></div>
+    <div class="building" style="height:55px;"></div>
+    <div class="building" style="height:42px;"></div>
+    <div class="building" style="height:90px;"></div>
+    <div class="building" style="height:48px;"></div>
+    <div class="building" style="height:65px;"></div>
+  </div>
+
+  <div class="cat-silhouette">&#128049;</div>
+
+  <div class="text-block content-finale">
+    <em>Le reve est etrange.</em><br>
+    <em>Trop lourd, trop rigide.</em><br><br>
+    <em>Mais fascinant.</em>
+  </div>
+
+  <div class="credentials">
+    <h3>Tes cles pour ce monde</h3>
+    <div class="cred-line">Login : <span>aeden</span></div>
+    <div class="cred-line">Mot de passe : <span>TON_MDP_ICI</span></div>
+  </div>
+</div>
+
+<script>
+function normalize(str) {
+  return str.toLowerCase().trim()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z ]/g, "");
+}
+
+function hideAmbiance() {
+  document.getElementById('fireflies').style.display = 'none';
+  document.getElementById('colorDrain').style.display = 'none';
+  document.getElementById('cageBars').style.display = 'none';
+}
+
+function goStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  const step = document.getElementById('step' + n);
+  step.classList.add('active');
+
+  const bgClass = step.className.split(' ').find(c => c.startsWith('bg-'));
+  document.body.className = bgClass;
+
+  hideAmbiance();
+  if (n === 1) {
+    document.getElementById('fireflies').style.display = 'block';
+  } else if (n === 2) {
+    document.getElementById('colorDrain').style.display = 'block';
+  } else if (n === 3) {
+    document.getElementById('cageBars').style.display = 'block';
+  }
+
+  window.scrollTo(0, 0);
+}
+
+function flashAndGo(n, type) {
+  const flash = document.getElementById('flash');
+  flash.className = 'flash-overlay active-' + (type || 'green');
+  setTimeout(() => {
+    flash.className = 'flash-overlay';
+    goStep(n);
+  }, 1500);
+}
+
+// === ETAPE 1 ===
+function check1() {
+  const input = normalize(document.getElementById('ans1').value);
+  const valid = [
+    "cercle druidique du bosquet des songes",
+    "le cercle druidique du bosquet des songes",
+    "bosquet des songes",
+    "le bosquet des songes",
+    "cercle du bosquet des songes",
+    "le cercle du bosquet des songes"
+  ];
+  if (valid.includes(input)) {
+    // Fade mushrooms before transition
+    document.querySelectorAll('.mushroom').forEach(m => m.classList.add('fading'));
+    setTimeout(() => flashAndGo(2, 'grey'), 2000);
+  } else {
+    document.getElementById('err1').textContent = "Les lucioles hesitent. Ce n'est pas le bon nom.";
+  }
+}
+
+// === ETAPE 2 ===
+function check2() {
+  const a = document.querySelector('input[name="q2a"]:checked');
+  const b = document.querySelector('input[name="q2b"]:checked');
+  const c = document.querySelector('input[name="q2c"]:checked');
+
+  if (!a || !b || !c) {
+    document.getElementById('err2').textContent = "Remplis les trois.";
+    return;
+  }
+
+  if (a.value === "couleurs" && b.value === "sons" && c.value === "air") {
+    document.getElementById('orderZone').style.display = 'none';
+    document.getElementById('btn2').style.display = 'none';
+    document.getElementById('letter1').classList.add('show');
+    setTimeout(() => document.getElementById('next2').classList.add('show'), 2000);
+  } else {
+    document.getElementById('err2').textContent = "L'ordre n'est pas le bon. Souviens-toi.";
+  }
+}
+
+// === ETAPE 3 ===
+function check3() {
+  const selected = document.querySelector('input[name="q3"]:checked');
+  if (!selected) {
+    document.getElementById('err3').textContent = "Choisis une reponse.";
+    return;
+  }
+  if (selected.value === "correct") {
+    document.getElementById('radioZone3').style.display = 'none';
+    document.getElementById('btn3').style.display = 'none';
+    document.getElementById('letter2').classList.add('show');
+    setTimeout(() => document.getElementById('next3').classList.add('show'), 2000);
+  } else {
+    document.getElementById('err3').textContent = "Les barreaux grincent. Ce n'est pas le bon mot.";
+  }
+}
+
+// === ETAPE 4 ===
+function check4a() {
+  const input = normalize(document.getElementById('ans4a').value).replace(/ /g, '');
+  const valid = ["chat", "unchat", "formedechat", "formesauvagedechat"];
+  if (valid.includes(input)) {
+    document.getElementById('input4a').style.display = 'none';
+    document.getElementById('assembly').classList.add('show');
+  } else {
+    document.getElementById('err4a').textContent = "Ce n'est pas cette forme. Reflechis.";
+  }
+}
+
+function check4b() {
+  const input = document.getElementById('ans4b').value.toLowerCase().trim();
+  if (input === "sochat") {
+    flashAndGo(5, 'warm');
+  } else {
+    document.getElementById('err4b').textContent = "Le seuil resiste. Reassemble.";
+  }
+}
+
+// Enter key
+document.addEventListener('keypress', function(e) {
+  if (e.key !== 'Enter') return;
+  const active = document.querySelector('.step.active');
+  if (!active) return;
+  const id = active.id;
+  if (id === 'step1') check1();
+  else if (id === 'step2') check2();
+  else if (id === 'step3') check3();
+  else if (id === 'step4') {
+    if (document.getElementById('assembly').classList.contains('show')) check4b();
+    else check4a();
+  }
+});
+</script>
+
+</body>
+</html>
