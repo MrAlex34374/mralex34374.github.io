@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rapport d'initialisation : KAEL-7</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Courier New', monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    overflow: hidden;
+    transition: background 2s ease;
+  }
+
+  .step {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    width: 100%;
+    padding: 40px 20px;
+  }
+
+  .step.active {
+    display: flex;
+    animation: fadeIn 2s ease-in forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ===== ETAPE 0 — Boot ===== */
+  .bg-boot {
+    background: #050608;
+    color: #4a7a9a;
+  }
+
+  .scanline {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 2px,
+      rgba(74,122,154,0.03) 2px,
+      rgba(74,122,154,0.03) 4px
+    );
+  }
+
+  .cursor-blink {
+    display: inline-block;
+    width: 8px;
+    height: 1.1em;
+    background: #4a7a9a;
+    margin-left: 4px;
+    animation: blink 1s step-end infinite;
+    vertical-align: text-bottom;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* ===== ETAPE 1 — Neige ===== */
+  .bg-neige {
+    background: linear-gradient(to bottom, #1a1e24 0%, #222830 50%, #1e2228 100%);
+    color: #8aa0b8;
+  }
+
+  .snowfall {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .snowflake {
+    position: absolute;
+    top: -10px;
+    width: 3px; height: 3px;
+    border-radius: 50%;
+    background: rgba(180,200,220,0.4);
+    animation: snowDrift 8s linear infinite;
+  }
+
+  .snowflake:nth-child(1) { left: 5%; animation-delay: 0s; animation-duration: 7s; }
+  .snowflake:nth-child(2) { left: 15%; animation-delay: 1s; animation-duration: 9s; }
+  .snowflake:nth-child(3) { left: 28%; animation-delay: 0.5s; animation-duration: 6s; }
+  .snowflake:nth-child(4) { left: 42%; animation-delay: 2s; animation-duration: 8s; }
+  .snowflake:nth-child(5) { left: 55%; animation-delay: 3s; animation-duration: 10s; }
+  .snowflake:nth-child(6) { left: 68%; animation-delay: 1.5s; animation-duration: 7s; }
+  .snowflake:nth-child(7) { left: 78%; animation-delay: 0.8s; animation-duration: 9s; }
+  .snowflake:nth-child(8) { left: 90%; animation-delay: 2.5s; animation-duration: 6.5s; }
+  .snowflake:nth-child(9) { left: 35%; animation-delay: 4s; animation-duration: 8.5s; }
+  .snowflake:nth-child(10) { left: 62%; animation-delay: 3.5s; animation-duration: 7.5s; }
+
+  @keyframes snowDrift {
+    0% { top: -10px; transform: translateX(0); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { top: 100vh; transform: translateX(30px); opacity: 0; }
+  }
+
+  /* ===== ETAPE 2 — Le Village ===== */
+  .bg-village {
+    background: linear-gradient(to bottom, #181c22 0%, #1c2028 50%, #141820 100%);
+    color: #7a90a8;
+  }
+
+  .smoke {
+    position: fixed;
+    bottom: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .smoke-puff {
+    position: absolute;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(120,140,160,0.15);
+    animation: smokeRise 5s ease-out infinite;
+  }
+
+  .smoke-puff:nth-child(1) { animation-delay: 0s; left: 0; }
+  .smoke-puff:nth-child(2) { animation-delay: 1.5s; left: 8px; }
+  .smoke-puff:nth-child(3) { animation-delay: 3s; left: -5px; }
+
+  @keyframes smokeRise {
+    0% { bottom: 0; opacity: 0.3; transform: scale(1) translateX(0); }
+    50% { opacity: 0.15; transform: scale(2) translateX(10px); }
+    100% { bottom: 200px; opacity: 0; transform: scale(3) translateX(-10px); }
+  }
+
+  /* ===== ETAPE 3 — L'Hiver ===== */
+  .bg-hiver {
+    background: linear-gradient(to bottom, #0e1218 0%, #141a22 50%, #0a0e14 100%);
+    color: #6a88a8;
+  }
+
+  .rune-glow {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .rune-particle {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: #4a8aba;
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(74,138,186,0.3);
+    animation: runeFloat 6s ease-in-out infinite;
+  }
+
+  .rune-particle:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
+  .rune-particle:nth-child(2) { top: 60%; left: 80%; animation-delay: 2s; }
+  .rune-particle:nth-child(3) { top: 40%; left: 50%; animation-delay: 4s; }
+  .rune-particle:nth-child(4) { top: 75%; left: 25%; animation-delay: 1s; }
+  .rune-particle:nth-child(5) { top: 30%; left: 70%; animation-delay: 3s; }
+
+  @keyframes runeFloat {
+    0%, 100% { transform: translateY(0); opacity: 0.3; }
+    50% { transform: translateY(-15px); opacity: 0.8; }
+  }
+
+  /* ===== ETAPE 4 — Les Loups ===== */
+  .bg-loups {
+    background: linear-gradient(to bottom, #0a0c10 0%, #0c1018 50%, #060810 100%);
+    color: #5a78a0;
+  }
+
+  .spectral-eyes {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .eye-pair {
+    position: absolute;
+    display: flex;
+    gap: 12px;
+  }
+
+  .eye {
+    width: 5px; height: 3px;
+    border-radius: 50%;
+    background: #4a8aba;
+    box-shadow: 0 0 8px rgba(74,138,186,0.5), 0 0 20px rgba(74,138,186,0.2);
+    animation: eyeGlow 4s ease-in-out infinite;
+  }
+
+  .eye-pair:nth-child(1) { top: 25%; left: 8%; animation-delay: 0s; }
+  .eye-pair:nth-child(1) .eye { animation-delay: 0s; }
+  .eye-pair:nth-child(2) { top: 60%; right: 12%; }
+  .eye-pair:nth-child(2) .eye { animation-delay: 1.5s; }
+  .eye-pair:nth-child(3) { top: 45%; left: 85%; }
+  .eye-pair:nth-child(3) .eye { animation-delay: 3s; }
+
+  @keyframes eyeGlow {
+    0%, 100% { opacity: 0.2; }
+    30% { opacity: 0.9; }
+    35% { opacity: 0.1; }
+    40% { opacity: 0.8; }
+    70% { opacity: 0.3; }
+  }
+
+  /* ===== ETAPE 5 — Le Sentier ===== */
+  .bg-sentier {
+    background: linear-gradient(to bottom, #141820 0%, #1e2430 40%, #282e3a 100%);
+    color: #4a7a9a;
+  }
+
+  /* ===== COMMUN ===== */
+  .text-block {
+    max-width: 620px;
+    text-align: center;
+    line-height: 1.8;
+    font-size: 1rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .log-line {
+    text-align: left;
+    font-size: 0.85rem;
+    opacity: 0.6;
+    margin-bottom: 6px;
+  }
+
+  .log-line.highlight {
+    opacity: 1;
+    color: #6aa0c8;
+  }
+
+  .observation {
+    text-align: left;
+    font-size: 0.9rem;
+    margin: 8px 0;
+    padding-left: 20px;
+    border-left: 2px solid rgba(74,122,154,0.3);
+    opacity: 0.8;
+  }
+
+  .input-zone {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+    z-index: 1;
+  }
+
+  input[type="text"] {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #2a3a4a;
+    color: #8aa0b8;
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    padding: 8px 16px;
+    text-align: center;
+    width: 380px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  input[type="text"]:focus { border-bottom-color: #4a7a9a; }
+
+  button {
+    background: transparent;
+    border: 1px solid #2a3a4a;
+    color: #6a8aa0;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    padding: 10px 30px;
+    cursor: pointer;
+    transition: all 0.3s;
+    letter-spacing: 1px;
+  }
+
+  button:hover { border-color: #4a7a9a; color: #8ab0d0; }
+
+  .error-msg {
+    font-size: 0.85rem;
+    min-height: 24px;
+    color: #5a3a3a;
+  }
+
+  .radio-zone {
+    margin-top: 35px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    z-index: 1;
+  }
+
+  .radio-zone label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+
+  .radio-zone label:hover { color: #8ab0d0; }
+
+  input[type="radio"] {
+    accent-color: #4a7a9a;
+    width: 14px; height: 14px;
+    cursor: pointer;
+  }
+
+  .letter-reveal {
+    display: none;
+    font-size: 3rem;
+    margin-top: 30px;
+    z-index: 1;
+    color: #4a8aba;
+    text-shadow: 0 0 20px rgba(74,138,186,0.4);
+  }
+
+  .letter-reveal.show {
+    display: block;
+    animation: letterGlow 2s ease-in forwards;
+  }
+
+  @keyframes letterGlow {
+    0% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  .next-text {
+    display: none;
+    margin-top: 20px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: color 0.3s;
+    z-index: 1;
+    color: #4a6a80;
+  }
+
+  .next-text.show { display: block; }
+  .next-text:hover { color: #8ab0d0; }
+
+  .assembly {
+    display: none;
+    margin-top: 40px;
+    text-align: center;
+    max-width: 550px;
+    line-height: 1.8;
+    z-index: 1;
+  }
+
+  .assembly.show { display: block; }
+
+  .credentials {
+    margin-top: 40px;
+    padding: 25px 40px;
+    border: 1px solid rgba(74,122,154,0.3);
+    background: rgba(74,122,154,0.05);
+    border-radius: 4px;
+    text-align: center;
+    z-index: 2;
+    font-family: 'Courier New', monospace;
+  }
+
+  .credentials h3 {
+    font-size: 0.9rem;
+    color: #4a7a9a;
+    margin-bottom: 15px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .cred-line {
+    font-size: 0.95rem;
+    margin: 8px 0;
+    color: #5a7a90;
+  }
+
+  .cred-line span {
+    font-weight: bold;
+    background: rgba(74,122,154,0.1);
+    padding: 2px 8px;
+    border-radius: 3px;
+    color: #6a9ab8;
+  }
+
+  .flash-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  .flash-overlay.active-static {
+    animation: flashStatic 1.5s ease-out forwards;
+  }
+
+  .flash-overlay.active-frost {
+    animation: flashFrost 1.5s ease-out forwards;
+  }
+
+  @keyframes flashStatic {
+    0% { opacity: 0; background: #4a7a9a; }
+    5% { opacity: 0.3; }
+    10% { opacity: 0; }
+    15% { opacity: 0.2; }
+    20% { opacity: 0; }
+    100% { opacity: 0; }
+  }
+
+  @keyframes flashFrost {
+    0% { opacity: 0; background: #8ac0e0; }
+    10% { opacity: 0.2; }
+    100% { opacity: 0; }
+  }
+
+  .quote-final {
+    margin-top: 30px;
+    font-size: 0.85rem;
+    max-width: 500px;
+    text-align: left;
+    line-height: 1.8;
+    z-index: 1;
+    opacity: 0.6;
+    border-left: 2px solid rgba(74,138,186,0.3);
+    padding-left: 15px;
+  }
+
+  .boot-log {
+    text-align: left;
+    max-width: 500px;
+    z-index: 1;
+  }
+
+  .boot-line {
+    font-size: 0.85rem;
+    opacity: 0;
+    animation: bootAppear 0.5s ease-in forwards;
+    margin-bottom: 8px;
+    color: #4a7a9a;
+  }
+
+  .boot-line:nth-child(1) { animation-delay: 0.5s; }
+  .boot-line:nth-child(2) { animation-delay: 1.5s; }
+  .boot-line:nth-child(3) { animation-delay: 2.5s; }
+  .boot-line:nth-child(4) { animation-delay: 3.5s; }
+  .boot-line:nth-child(5) { animation-delay: 4.5s; color: #6a3a3a; }
+  .boot-line:nth-child(6) { animation-delay: 5.5s; color: #6a3a3a; }
+  .boot-line:nth-child(7) { animation-delay: 7s; }
+
+  @keyframes bootAppear {
+    0% { opacity: 0; }
+    100% { opacity: 0.8; }
+  }
+
+  .boot-prompt {
+    opacity: 0;
+    animation: bootAppear 0.5s ease-in forwards;
+    animation-delay: 8.5s;
+    margin-top: 30px;
+    text-align: center;
+  }
+</style>
+</head>
+<body class="bg-boot">
+
+<div class="flash-overlay" id="flash"></div>
+<div class="scanline" id="scanline"></div>
+
+<!-- Ambiances -->
+<div class="snowfall" id="snowfall" style="display:none;">
+  <div class="snowflake"></div><div class="snowflake"></div><div class="snowflake"></div>
+  <div class="snowflake"></div><div class="snowflake"></div><div class="snowflake"></div>
+  <div class="snowflake"></div><div class="snowflake"></div><div class="snowflake"></div>
+  <div class="snowflake"></div>
+</div>
+
+<div class="smoke" id="smoke" style="display:none;">
+  <div class="smoke-puff"></div><div class="smoke-puff"></div><div class="smoke-puff"></div>
+</div>
+
+<div class="rune-glow" id="runeGlow" style="display:none;">
+  <div class="rune-particle"></div><div class="rune-particle"></div>
+  <div class="rune-particle"></div><div class="rune-particle"></div>
+  <div class="rune-particle"></div>
+</div>
+
+<div class="spectral-eyes" id="spectralEyes" style="display:none;">
+  <div class="eye-pair"><div class="eye"></div><div class="eye"></div></div>
+  <div class="eye-pair"><div class="eye"></div><div class="eye"></div></div>
+  <div class="eye-pair"><div class="eye"></div><div class="eye"></div></div>
+</div>
+
+<!-- ==================== ETAPE 0 — Boot ==================== -->
+<div class="step bg-boot active" id="step0">
+  <div class="boot-log">
+    <div class="boot-line">> Initialisation unite KAEL-7...</div>
+    <div class="boot-line">> Designation : Observateur de terrain</div>
+    <div class="boot-line">> Verification matrices sensorielles... OK</div>
+    <div class="boot-line">> Connexion a Mechanus...</div>
+    <div class="boot-line">> ERREUR : Connexion interrompue</div>
+    <div class="boot-line">> ERREUR : Localisation inconnue</div>
+    <div class="boot-line">> Mode autonome active. Bienvenue, KAEL-7.<span class="cursor-blink"></span></div>
+  </div>
+
+  <div class="boot-prompt">
+    <button onclick="goStep(1)">[ CONTINUER ]</button>
+  </div>
+</div>
+
+<!-- ==================== ETAPE 1 — La Neige ==================== -->
+<div class="step bg-neige" id="step1">
+  <div class="text-block">
+    <div class="log-line">// La premiere chose que tu as percue, c'etait le froid.</div>
+    <div class="log-line">// Trois jours de marche dans la neige.</div>
+    <div class="log-line highlight">// Puis un village.</div>
+    <br>
+    <div class="observation">Observation #1 : Les creatures organiques regroupent leurs habitations pour optimiser la chaleur. Logique.</div>
+    <br>
+    Comment s'appelait ce village ?
+  </div>
+
+  <div class="input-zone">
+    <input type="text" id="ans1" placeholder="> _" autocomplete="off">
+    <button onclick="check1()">ENTRER</button>
+    <div class="error-msg" id="err1"></div>
+  </div>
+</div>
+
+<!-- ==================== ETAPE 2 — Yrsa ==================== -->
+<div class="step bg-village" id="step2">
+  <div class="text-block">
+    <div class="log-line">// Une vieille ranger. Cheveux blancs tresses.</div>
+    <div class="log-line">// Oeil gauche laiteux. Mains couvertes de cicatrices de griffes.</div>
+    <div class="log-line highlight">// Elle t'a trouve en train de cataloguer des traces de pas.</div>
+    <br>
+    <div class="observation">Observation #3 : Les organiques interrompent frequemment les transmissions de donnees. Inefficace, mais recurrent.</div>
+    <br>
+    Quel est son nom ?
+  </div>
+
+  <div class="input-zone">
+    <input type="text" id="ans2" placeholder="> _" autocomplete="off">
+    <button onclick="check2()">ENTRER</button>
+    <div class="error-msg" id="err2"></div>
+  </div>
+
+  <div class="letter-reveal" id="letter1">7</div>
+  <div class="next-text" id="next2" onclick="goStep(3)">
+    > Donnee stockee. Continuer... &#8594;
+  </div>
+</div>
+
+<!-- ==================== ETAPE 3 — L'Hiver ==================== -->
+<div class="step bg-hiver" id="step3">
+  <div class="text-block">
+    <div class="log-line highlight">// Observation #247 recue. Analyse en cours...</div>
+    <br>
+    <div class="observation">L'hiver est la saison la plus proche de la loi. Tout ralentit, tout se simplifie, tout survit par discipline. C'est... beau.</div>
+    <div class="observation" style="color:#5a3a3a;">Note personnelle : Je ne savais pas que je pouvais trouver quelque chose "beau". Mettre a jour les parametres.</div>
+    <br>
+    Les villageois t'ont donne un surnom.<br>
+    Lequel ?
+  </div>
+
+  <div class="radio-zone" id="radioZone3">
+    <label><input type="radio" name="q3" value="wrong1"> L'Aile de Fer</label>
+    <label><input type="radio" name="q3" value="correct"> L'Oiseau de Givre</label>
+    <label><input type="radio" name="q3" value="wrong2"> Le Marcheur de Neige</label>
+    <label><input type="radio" name="q3" value="wrong3"> L'Automate du Nord</label>
+  </div>
+
+  <div class="input-zone" id="btn3">
+    <button onclick="check3()">CONFIRMER</button>
+    <div class="error-msg" id="err3"></div>
+  </div>
+
+  <div class="letter-reveal" id="letter2">G</div>
+  <div class="next-text" id="next3" onclick="goStep(4)">
+    > Donnee stockee. Continuer... &#8594;
+  </div>
+</div>
+
+<!-- ==================== ETAPE 4 — Les Loups ==================== -->
+<div class="step bg-loups" id="step4">
+  <div class="text-block">
+    <div class="log-line">// Anomalie detectee.</div>
+    <div class="log-line" style="color:#5a3a3a;">// Signature planaire. Concordance partielle avec... ERREUR. Donnees corrompues.</div>
+    <div class="log-line highlight">// Source identifiee : une breche dans les plans.</div>
+    <br>
+    <div class="observation">Trois chasseurs retrouves geles. Loups spectraux. Yeux de braise bleue. Aucune trace dans la neige.</div>
+    <br>
+    D'ou viennent-ils ? Quel lieu a nomme Yrsa ?<br>
+    <span style="font-size:0.8rem;opacity:0.5;">(Nom complet du lieu)</span>
+  </div>
+
+  <div class="input-zone" id="input4a">
+    <input type="text" id="ans4a" placeholder="> _" autocomplete="off">
+    <button onclick="check4a()">LOCALISER</button>
+    <div class="error-msg" id="err4a"></div>
+  </div>
+
+  <div class="assembly" id="assembly">
+    <div class="log-line highlight">// Assemblage des donnees collectees.</div>
+    <br>
+    Assemble tes fragments :<br>
+    Le chiffre, la lettre, puis ta designation.<br>
+    <span style="font-size:0.8rem;opacity:0.5;">Sans espace, sans majuscule.</span>
+
+    <div class="input-zone">
+      <input type="text" id="ans4b" placeholder="> _" autocomplete="off">
+      <button onclick="check4b()">COMPILER</button>
+      <div class="error-msg" id="err4b"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ETAPE 5 — Le Sentier ==================== -->
+<div class="step bg-sentier" id="step5">
+  <div class="text-block">
+    <div class="log-line">// Mission acceptee.</div>
+    <div class="log-line">// Priorite : neutraliser la menace.</div>
+    <div class="log-line">// Priorite secondaire : obtenir des reponses.</div>
+  </div>
+
+  <div class="quote-final">
+    > Quelque part la-haut, une faille crachait des creatures impossibles dans un monde qui n'etait pas le sien.<br><br>
+    > Comme moi.<br><br>
+    > ...<br><br>
+    > Non. Pas comme moi. Moi, j'ai choisi de rester.
+  </div>
+
+  <div class="credentials">
+    <h3>> Acces autorise</h3>
+    <div class="cred-line">Login : <span>Kael</span></div>
+    <div class="cred-line">Mot de passe : <span>TON_MDP_ICI</span></div>
+  </div>
+</div>
+
+<script>
+function normalize(str) {
+  return str.toLowerCase().trim()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9 ]/g, "");
+}
+
+function hideAmbiance() {
+  document.getElementById('scanline').style.display = 'none';
+  document.getElementById('snowfall').style.display = 'none';
+  document.getElementById('smoke').style.display = 'none';
+  document.getElementById('runeGlow').style.display = 'none';
+  document.getElementById('spectralEyes').style.display = 'none';
+}
+
+function goStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  const step = document.getElementById('step' + n);
+  step.classList.add('active');
+
+  const bgClass = step.className.split(' ').find(c => c.startsWith('bg-'));
+  document.body.className = bgClass;
+
+  hideAmbiance();
+  if (n === 0) {
+    document.getElementById('scanline').style.display = 'block';
+  } else if (n === 1) {
+    document.getElementById('snowfall').style.display = 'block';
+  } else if (n === 2) {
+    document.getElementById('snowfall').style.display = 'block';
+    document.getElementById('smoke').style.display = 'block';
+  } else if (n === 3) {
+    document.getElementById('snowfall').style.display = 'block';
+    document.getElementById('runeGlow').style.display = 'block';
+  } else if (n === 4) {
+    document.getElementById('spectralEyes').style.display = 'block';
+  } else if (n === 5) {
+    document.getElementById('snowfall').style.display = 'block';
+  }
+
+  window.scrollTo(0, 0);
+}
+
+function flashAndGo(n, type) {
+  const flash = document.getElementById('flash');
+  flash.className = 'flash-overlay active-' + (type || 'static');
+  setTimeout(() => {
+    flash.className = 'flash-overlay';
+    goStep(n);
+  }, 1500);
+}
+
+// === ETAPE 1 ===
+function check1() {
+  const input = normalize(document.getElementById('ans1').value).replace(/ /g, '');
+  const valid = ["skoldheim", "skoeldheim"];
+  if (valid.includes(input)) {
+    flashAndGo(2, 'frost');
+  } else {
+    document.getElementById('err1').textContent = "> ERREUR : Village non reconnu. Reverifier les donnees.";
+  }
+}
+
+// === ETAPE 2 ===
+function check2() {
+  const input = normalize(document.getElementById('ans2').value).replace(/ /g, '');
+  if (input === "yrsa") {
+    document.querySelector('#step2 .input-zone').style.display = 'none';
+    document.getElementById('letter1').classList.add('show');
+    setTimeout(() => document.getElementById('next2').classList.add('show'), 2000);
+  } else {
+    document.getElementById('err2').textContent = "> ERREUR : Identifiant inconnu.";
+  }
+}
+
+// === ETAPE 3 ===
+function check3() {
+  const selected = document.querySelector('input[name="q3"]:checked');
+  if (!selected) {
+    document.getElementById('err3').textContent = "> ERREUR : Selection requise.";
+    return;
+  }
+  if (selected.value === "correct") {
+    document.getElementById('radioZone3').style.display = 'none';
+    document.getElementById('btn3').style.display = 'none';
+    document.getElementById('letter2').classList.add('show');
+    setTimeout(() => document.getElementById('next3').classList.add('show'), 2000);
+  } else {
+    document.getElementById('err3').textContent = "> ERREUR : Designation incorrecte. Consulter memoire locale.";
+  }
+}
+
+// === ETAPE 4 ===
+function check4a() {
+  const input = normalize(document.getElementById('ans4a').value).replace(/ /g, '');
+  const valid = ["coldelamentations", "lecoldelamentations", "coldeslamentations", "lecoldeslamentations"];
+  if (valid.includes(input)) {
+    document.getElementById('input4a').style.display = 'none';
+    document.getElementById('assembly').classList.add('show');
+  } else {
+    document.getElementById('err4a').textContent = "> ERREUR : Lieu non identifie. Reverifier.";
+  }
+}
+
+function check4b() {
+  const input = document.getElementById('ans4b').value.toLowerCase().trim()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  if (input === "7gkael" || input === "7gkael7" || input === "7gkael-7") {
+    flashAndGo(5, 'frost');
+  } else {
+    document.getElementById('err4b').textContent = "> ERREUR : Compilation echouee. Reassembler.";
+  }
+}
+
+// Enter key
+document.addEventListener('keypress', function(e) {
+  if (e.key !== 'Enter') return;
+  const active = document.querySelector('.step.active');
+  if (!active) return;
+  const id = active.id;
+  if (id === 'step1') check1();
+  else if (id === 'step2') check2();
+  else if (id === 'step3') check3();
+  else if (id === 'step4') {
+    if (document.getElementById('assembly').classList.contains('show')) check4b();
+    else check4a();
+  }
+});
+</script>
+
+</body>
+</html>
