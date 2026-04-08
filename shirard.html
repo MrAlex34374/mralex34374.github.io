@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shirard — Le Donjon de Thay</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a0a;
+    color: #c8b89a;
+    font-family: 'Crimson Text', serif;
+    font-size: 1.15rem;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .scene {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    width: 100%;
+    padding: 2rem;
+    text-align: center;
+    position: absolute;
+    top: 0; left: 0;
+    animation: fadeIn 1.2s ease;
+  }
+
+  .scene.active { display: flex; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+  }
+
+  @keyframes crackFlash {
+    0% { opacity: 0; }
+    20% { opacity: 1; background: #fff; }
+    60% { opacity: 0.6; background: #e0d0b0; }
+    100% { opacity: 0; }
+  }
+
+  @keyframes sunriseGradient {
+    0% { background: #0a0a0a; }
+    100% { background: linear-gradient(180deg, #1a0a00 0%, #5c2a00 40%, #c87020 80%, #f0c060 100%); }
+  }
+
+  /* SCENE 1 */
+  #scene1 {
+    background: #0a0a0a;
+  }
+
+  /* SCENE 2 */
+  #scene2 {
+    background: #0d0d0d;
+  }
+
+  /* SCENE 3 */
+  #scene3 {
+    background: #101010;
+  }
+
+  /* SCENE 4 */
+  #scene4 {
+    background: #121008;
+  }
+
+  /* SCENE 5 — Sortie */
+  #scene5 {
+    animation: sunriseGradient 2s ease forwards;
+    background: #0a0a0a;
+  }
+
+  h1 {
+    font-family: 'IM Fell English', serif;
+    font-size: 1.6rem;
+    color: #e8d8b0;
+    letter-spacing: 0.05em;
+    margin-bottom: 2rem;
+    text-shadow: 0 0 20px rgba(200, 150, 50, 0.3);
+  }
+
+  .flavor {
+    font-style: italic;
+    color: #8a7a5a;
+    max-width: 520px;
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+  }
+
+  .question {
+    color: #c8b89a;
+    max-width: 520px;
+    line-height: 1.9;
+    margin-bottom: 2rem;
+  }
+
+  input[type="text"], input[type="password"] {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #5a4a2a;
+    color: #e8d8b0;
+    font-family: 'Crimson Text', serif;
+    font-size: 1.1rem;
+    padding: 0.5rem 0.8rem;
+    width: 240px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.3s;
+    margin-bottom: 1.5rem;
+  }
+
+  input[type="text"]:focus, input[type="password"]:focus {
+    border-bottom-color: #c87020;
+  }
+
+  button {
+    background: transparent;
+    border: 1px solid #5a4a2a;
+    color: #c8b89a;
+    font-family: 'IM Fell English', serif;
+    font-size: 1rem;
+    padding: 0.6rem 2rem;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    transition: all 0.3s;
+  }
+
+  button:hover {
+    border-color: #c87020;
+    color: #e8d8b0;
+    background: rgba(200, 112, 32, 0.1);
+  }
+
+  .error-msg {
+    color: #8a3030;
+    font-style: italic;
+    margin-top: 1rem;
+    min-height: 1.4rem;
+    font-size: 0.95rem;
+  }
+
+  .crack-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0;
+  }
+
+  /* MATCHING — scene 2 */
+  .match-table {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 0.7rem 1.2rem;
+    align-items: center;
+    margin: 1.5rem auto;
+    max-width: 480px;
+    text-align: left;
+  }
+
+  .match-name {
+    color: #e8d8b0;
+    font-style: italic;
+    text-align: right;
+    padding-right: 0.5rem;
+  }
+
+  .match-arrow {
+    color: #5a4a2a;
+    font-size: 1.1rem;
+  }
+
+  .match-select {
+    background: #0d0d0d;
+    border: 1px solid #3a2a10;
+    color: #c8b89a;
+    font-family: 'Crimson Text', serif;
+    font-size: 1rem;
+    padding: 0.3rem 0.5rem;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.3s;
+  }
+
+  .match-select:focus {
+    border-color: #c87020;
+  }
+
+  /* SCENE 5 specifics */
+  .credentials-box {
+    border: 1px solid #5a4a2a;
+    padding: 1.5rem 2rem;
+    margin: 1.5rem auto;
+    max-width: 400px;
+    background: rgba(0,0,0,0.3);
+  }
+
+  .credential-line {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    margin-bottom: 0.8rem;
+    justify-content: flex-start;
+  }
+
+  .credential-label {
+    color: #8a7a5a;
+    font-style: italic;
+    min-width: 110px;
+    text-align: right;
+  }
+
+  .credential-value {
+    color: #e8d8b0;
+    font-family: 'IM Fell English', serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+  }
+
+  .divider {
+    width: 60px;
+    height: 1px;
+    background: #3a2a10;
+    margin: 1.5rem auto;
+  }
+
+  /* Silhouettes SVG simples */
+  .silhouettes {
+    display: flex;
+    gap: 2rem;
+    margin: 1.5rem auto;
+    justify-content: center;
+    opacity: 0.6;
+  }
+
+  .sil {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.8rem;
+    color: #5a4a2a;
+    font-style: italic;
+  }
+
+  .sil svg {
+    fill: #3a2a10;
+  }
+
+  .sun-text {
+    color: #f0c060;
+    text-shadow: 0 0 20px rgba(240, 192, 96, 0.5);
+  }
+
+  .fade-slow {
+    animation: fadeIn 2.5s ease;
+  }
+</style>
+</head>
+<body>
+
+<div class="crack-overlay" id="crackOverlay"></div>
+
+<!-- SCENE 1 : La cellule -->
+<div class="scene active" id="scene1">
+  <h1>La Cellule</h1>
+  <p class="flavor">
+    Quatre ont survécu là où des centaines ont péri.<br>
+    Trois voix derrière le mur. Trois derniers mots.
+  </p>
+  <p class="question">
+    Le premier a crié un ordre.<br>
+    La seconde a énoncé une vérité.<br>
+    Le troisième t'a offert un nombre.<br><br>
+    <em>Quel nombre ?</em>
+  </p>
+  <input type="text" id="input1" placeholder="..." autocomplete="off" />
+  <button onclick="checkScene1()">Continuer</button>
+  <p class="error-msg" id="err1"></p>
+</div>
+
+<!-- SCENE 2 : Le couloir -->
+<div class="scene" id="scene2">
+  <h1>Le Couloir</h1>
+  <p class="flavor">
+    Vous étiez quatre dans le noir.<br>
+    Chacun portait un don que Thay voulait enchaîner.
+  </p>
+  <p class="question">Associe chaque nom à ce qui brûlait en lui.</p>
+
+  <div class="silhouettes">
+    <div class="sil">
+      <svg width="28" height="50" viewBox="0 0 28 50">
+        <circle cx="14" cy="8" r="7"/>
+        <rect x="7" y="16" width="14" height="22" rx="3"/>
+        <rect x="3" y="16" width="7" height="16" rx="2"/>
+        <rect x="18" y="16" width="7" height="16" rx="2"/>
+        <rect x="6" y="36" width="7" height="14" rx="2"/>
+        <rect x="15" y="36" width="7" height="14" rx="2"/>
+      </svg>
+      Ervin
+    </div>
+    <div class="sil">
+      <svg width="28" height="50" viewBox="0 0 28 50">
+        <ellipse cx="14" cy="8" rx="6" ry="7"/>
+        <polygon points="8,3 4,0 7,5" fill="#5a4a2a"/>
+        <polygon points="20,3 24,0 21,5" fill="#5a4a2a"/>
+        <rect x="7" y="16" width="14" height="22" rx="3"/>
+        <rect x="3" y="16" width="7" height="16" rx="2"/>
+        <rect x="18" y="16" width="7" height="16" rx="2"/>
+        <rect x="6" y="36" width="7" height="14" rx="2"/>
+        <rect x="15" y="36" width="7" height="14" rx="2"/>
+      </svg>
+      Gyrda
+    </div>
+    <div class="sil">
+      <svg width="28" height="50" viewBox="0 0 28 50">
+        <circle cx="14" cy="8" r="7"/>
+        <polygon points="10,2 14,-2 18,2" fill="#5a4a2a"/>
+        <rect x="7" y="16" width="14" height="22" rx="3"/>
+        <rect x="3" y="16" width="7" height="16" rx="2"/>
+        <rect x="18" y="16" width="7" height="16" rx="2"/>
+        <rect x="6" y="36" width="7" height="14" rx="2"/>
+        <rect x="15" y="36" width="7" height="14" rx="2"/>
+      </svg>
+      Shirard
+    </div>
+    <div class="sil">
+      <svg width="28" height="50" viewBox="0 0 28 50">
+        <circle cx="14" cy="8" r="6"/>
+        <ellipse cx="8" cy="6" rx="3" ry="4" transform="rotate(-20 8 6)"/>
+        <ellipse cx="20" cy="6" rx="3" ry="4" transform="rotate(20 20 6)"/>
+        <rect x="7" y="16" width="14" height="22" rx="3"/>
+        <rect x="3" y="16" width="7" height="16" rx="2"/>
+        <rect x="18" y="16" width="7" height="16" rx="2"/>
+        <rect x="6" y="36" width="7" height="14" rx="2"/>
+        <rect x="15" y="36" width="7" height="14" rx="2"/>
+      </svg>
+      Vive-Esprit
+    </div>
+  </div>
+
+  <div class="match-table">
+    <span class="match-name">Ervin</span>
+    <span class="match-arrow">—</span>
+    <select class="match-select" id="sel_ervin">
+      <option value="">...</option>
+      <option value="feu">Feu</option>
+      <option value="illusions">Illusions</option>
+      <option value="chaos">Chaos</option>
+      <option value="resonance">Résonance</option>
+    </select>
+
+    <span class="match-name">Gyrda</span>
+    <span class="match-arrow">—</span>
+    <select class="match-select" id="sel_gyrda">
+      <option value="">...</option>
+      <option value="feu">Feu</option>
+      <option value="illusions">Illusions</option>
+      <option value="chaos">Chaos</option>
+      <option value="resonance">Résonance</option>
+    </select>
+
+    <span class="match-name">Shirard</span>
+    <span class="match-arrow">—</span>
+    <select class="match-select" id="sel_shirard">
+      <option value="">...</option>
+      <option value="feu">Feu</option>
+      <option value="illusions">Illusions</option>
+      <option value="chaos">Chaos</option>
+      <option value="resonance">Résonance</option>
+    </select>
+
+    <span class="match-name">Vive-Esprit</span>
+    <span class="match-arrow">—</span>
+    <select class="match-select" id="sel_vive">
+      <option value="">...</option>
+      <option value="feu">Feu</option>
+      <option value="illusions">Illusions</option>
+      <option value="chaos">Chaos</option>
+      <option value="resonance">Résonance</option>
+    </select>
+  </div>
+
+  <button onclick="checkScene2()">Continuer</button>
+  <p class="error-msg" id="err2"></p>
+</div>
+
+<!-- SCENE 3 : La cellule éventrée -->
+<div class="scene" id="scene3">
+  <h1>La Cellule Éventrée</h1>
+  <p class="flavor">
+    Le mur s'effondre. De l'autre côté, quelqu'un se tient debout.<br>
+    Il ne parle pas. Il fait signe.
+  </p>
+  <p class="question">
+    Il ne possède ni chaleur, ni chaos, ni illusion, ni résonance.<br>
+    Il possède autre chose. Quelque chose que tu as appris à son contact.<br><br>
+    Qu'as-tu imité chez lui sans t'en rendre compte ?<br>
+    <em>Un seul mot.</em>
+  </p>
+  <input type="text" id="input3" placeholder="..." autocomplete="off" />
+  <button onclick="checkScene3()">Continuer</button>
+  <p class="error-msg" id="err3"></p>
+</div>
+
+<!-- SCENE 4 : Assemblage -->
+<div class="scene" id="scene4">
+  <h1>Le Seuil</h1>
+  <p class="flavor">
+    Tu es à la porte. L'air du dehors commence à filtrer.<br>
+    Mais les portes de ce monde ont des serrures.
+  </p>
+  <p class="question">
+    Assemble ce que tu sais.<br><br>
+    Les lettres du couloir, dans l'ordre des noms — puis le mot de la cellule éventrée.<br>
+    Tout en minuscules, sans espace.
+  </p>
+  <input type="text" id="input4" placeholder="..." autocomplete="off" />
+  <button onclick="checkScene4()">Vérifier</button>
+  <p class="error-msg" id="err4"></p>
+  <div class="divider"></div>
+  <p class="flavor" style="font-size:0.88rem;">
+    <em>Indice : les lettres viennent des dons, dans l'ordre alphabétique des prénoms.</em>
+  </p>
+</div>
+
+<!-- SCENE 5 : La sortie — mot de passe fourni par le MD -->
+<div class="scene" id="scene5">
+  <h1 class="sun-text fade-slow">La Sortie</h1>
+  <p class="flavor fade-slow">
+    Tu es dehors.<br>
+    Un marché bruyant. Un coucher de soleil réel.<br>
+    Le goût d'un fruit que tu n'as jamais mangé.
+  </p>
+
+  <div class="credentials-box fade-slow">
+    <div class="credential-line">
+      <span class="credential-label">Login</span>
+      <span class="credential-value" id="displayLogin">—</span>
+    </div>
+    <div class="divider" style="margin:0.8rem auto;"></div>
+    <div class="credential-line">
+      <span class="credential-label">Mot de passe</span>
+      <span class="credential-value" id="displayPassword">—</span>
+    </div>
+  </div>
+
+  <p class="question fade-slow" style="max-width:400px; font-size:1rem;">
+    Ces identifiants t'ouvrent les portes du monde.<br>
+    <em>Ne les perds pas.</em>
+  </p>
+</div>
+
+<script>
+  // =====================
+  // CONFIG — À MODIFIER
+  // =====================
+  const MD_LOGIN = "Shirard";          // Login Foundry
+  const MD_PASSWORD = "MDP"; // Mot de passe Foundry — remplace cette valeur
+
+  // Réponses attendues
+  const ANSWER_1 = ["4", "quatre"];
+  const ANSWER_3_VALID = ["discipline"];
+  const ANSWER_3_PROCHE = ["calme", "controle", "contrôle", "rigueur", "maitrise", "maîtrise", "silence", "froideur", "methode", "méthode"];
+  // Ordre alphab: Ervin(Feu=F), Gyrda(Illusions=I), Shirard(Chaos=C), Vive-Esprit(Resonance=R)
+  const ANSWER_4 = "ficrdiscipline";
+
+  // =====================
+
+  function normalize(str) {
+    return str.trim().toLowerCase()
+      .normalize("NFD").replace(/[̀-ͯ]/g, "")
+      .replace(/[^a-z0-9]/g, "");
+  }
+
+  function triggerCrack(callback) {
+    const overlay = document.getElementById('crackOverlay');
+    overlay.style.animation = 'none';
+    overlay.style.background = '#fff';
+    overlay.style.opacity = '0';
+    overlay.offsetHeight;
+    overlay.style.transition = 'opacity 0.1s ease';
+    overlay.style.opacity = '1';
+    setTimeout(() => {
+      overlay.style.transition = 'opacity 0.8s ease';
+      overlay.style.opacity = '0';
+      setTimeout(callback, 400);
+    }, 120);
+  }
+
+  function goTo(sceneId) {
+    document.querySelectorAll('.scene').forEach(s => {
+      s.classList.remove('active');
+      s.style.display = 'none';
+    });
+    const target = document.getElementById(sceneId);
+    target.style.display = 'flex';
+    target.classList.add('active');
+  }
+
+  function showError(scene, msg) {
+    document.getElementById(`err${scene}`).textContent = msg;
+    document.getElementById(`input${scene}`)?.focus();
+  }
+
+  function checkScene1() {
+    const input = document.getElementById('input1').value;
+    const normalized = normalize(input);
+
+    if (ANSWER_1.some(ans => normalize(ans) === normalized)) {
+      triggerCrack(() => goTo('scene2'));
+    } else {
+      showError(1, "Ce n'est pas le bon nombre.");
+    }
+  }
+
+  function checkScene2() {
+    const ervin = document.getElementById('sel_ervin').value;
+    const gyrda = document.getElementById('sel_gyrda').value;
+    const shirard = document.getElementById('sel_shirard').value;
+    const vive = document.getElementById('sel_vive').value;
+
+    if (ervin === 'feu' && gyrda === 'illusions' && shirard === 'chaos' && vive === 'resonance') {
+      triggerCrack(() => goTo('scene3'));
+    } else {
+      showError(2, "Certaines associations ne correspondent pas.");
+    }
+  }
+
+  function checkScene3() {
+    const input = document.getElementById('input3').value;
+    const normalized = normalize(input);
+
+    if (ANSWER_3_VALID.some(ans => normalize(ans) === normalized)) {
+      triggerCrack(() => goTo('scene4'));
+    } else if (ANSWER_3_PROCHE.some(ans => normalize(ans) === normalized)) {
+      showError(3, "C'est proche, mais pas tout à fait.");
+    } else {
+      showError(3, "Ce n'est pas le mot que tu cherches.");
+    }
+  }
+
+  function checkScene4() {
+    const input = document.getElementById('input4').value;
+    const normalized = normalize(input);
+
+    if (normalized === ANSWER_4) {
+      document.getElementById('displayLogin').textContent = MD_LOGIN;
+      document.getElementById('displayPassword').textContent = MD_PASSWORD;
+      triggerCrack(() => goTo('scene5'));
+    } else {
+      showError(4, "L'assemblage ne correspond pas.");
+    }
+  }
+</script>
+</body>
+</html>

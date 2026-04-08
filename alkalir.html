@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le Rêve du Dragon</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Georgia', serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    overflow: hidden;
+    transition: background 2s ease;
+  }
+
+  /* ========== ETAPES ========== */
+  .step {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    width: 100%;
+    padding: 40px 20px;
+  }
+
+  .step.active {
+    display: flex;
+    animation: fadeIn 2s ease-in forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ========== ETAPE 1 — La Caverne ========== */
+  .bg-caverne { background: #000; color: #ccc; }
+
+  .eyes-container {
+    display: flex;
+    gap: 120px;
+    margin-bottom: 60px;
+  }
+
+  .eye {
+    width: 18px;
+    height: 18px;
+    background: #7b2d8e;
+    border-radius: 50%;
+    box-shadow: 0 0 30px #7b2d8e, 0 0 60px #5a1a6e, 0 0 100px #7b2d8e;
+    animation: pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 30px #7b2d8e, 0 0 60px #5a1a6e; }
+    50% { box-shadow: 0 0 50px #9b3ab0, 0 0 90px #7b2d8e, 0 0 130px #5a1a6e; }
+  }
+
+  .eye.shake {
+    animation: eyeShake 0.4s ease-in-out 3;
+  }
+
+  @keyframes eyeShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+
+  /* ========== ETAPE 2 — Le Rituel ========== */
+  .bg-rituel { background: #1a1210; color: #ccc; }
+
+  .lava-border {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    border: 3px solid transparent;
+    background: linear-gradient(#1a1210, #1a1210) padding-box,
+                linear-gradient(90deg, #ff4500, #ff6600, #cc3300, #ff4500) border-box;
+    background-size: 100% 100%, 400% 100%;
+    animation: lavaFlow 4s linear infinite;
+    display: none;
+  }
+
+  .lava-border.active { display: block; }
+
+  @keyframes lavaFlow {
+    0% { background-position: 0 0, 0% 0; }
+    100% { background-position: 0 0, 400% 0; }
+  }
+
+  /* ========== ETAPE 3 — Le Rêve ========== */
+  .bg-reve { background: #2a0a0a; color: #ccc; }
+
+  .braziers {
+    display: flex;
+    gap: 160px;
+    margin-bottom: 50px;
+  }
+
+  .brazier {
+    width: 30px;
+    height: 30px;
+    background: radial-gradient(circle, #b044c0 0%, #7b2d8e 40%, transparent 70%);
+    border-radius: 50%;
+    animation: brazierPulse 2.5s ease-in-out infinite alternate;
+  }
+
+  .brazier:nth-child(2) { animation-delay: 0.5s; }
+
+  @keyframes brazierPulse {
+    0% { box-shadow: 0 0 30px #7b2d8e; transform: scale(1); }
+    100% { box-shadow: 0 0 60px #9b3ab0, 0 0 100px #7b2d8e; transform: scale(1.15); }
+  }
+
+  .checkbox-zone {
+    margin-top: 35px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+    color: #bbb;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+
+  label:hover { color: #ddd; }
+
+  input[type="checkbox"] {
+    accent-color: #7b2d8e;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+
+  /* ========== ETAPE 4 — La Porte ========== */
+  .bg-porte {
+    background: linear-gradient(to bottom, #2a0a0a 0%, #3a3a3a 100%);
+    color: #ccc;
+  }
+
+  .assembly {
+    display: none;
+    margin-top: 40px;
+    text-align: center;
+    max-width: 550px;
+    line-height: 1.8;
+  }
+
+  .assembly.show { display: block; }
+
+  /* ========== ETAPE 5 — Le Monde ========== */
+  .bg-monde {
+    background: linear-gradient(to bottom, #3a3a3a 0%, #d4a875 40%, #e8c9a0 100%);
+    color: #333;
+  }
+
+  .skyline {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 120px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 8px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .building {
+    background: rgba(40,30,20,0.4);
+    width: 30px;
+    border-radius: 2px 2px 0 0;
+  }
+
+  .credentials {
+    margin-top: 40px;
+    padding: 25px 40px;
+    border: 1px solid rgba(100,70,40,0.4);
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(4px);
+    border-radius: 8px;
+    text-align: center;
+    z-index: 1;
+  }
+
+  .credentials h3 {
+    font-size: 1rem;
+    color: #6b4a2a;
+    margin-bottom: 15px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .cred-line {
+    font-size: 1rem;
+    color: #333;
+    margin: 8px 0;
+  }
+
+  .cred-line span {
+    color: #8b4513;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    background: rgba(139,69,19,0.1);
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+
+  /* ========== COMMUN ========== */
+  .text-block {
+    max-width: 600px;
+    text-align: center;
+    line-height: 1.8;
+    font-size: 1.1rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .text-block em, .assembly em, .content-finale em {
+    font-style: italic;
+  }
+
+  .step.bg-caverne .text-block em { color: #9b8aaa; }
+  .step.bg-rituel .text-block em { color: #cc7a55; }
+  .step.bg-reve .text-block em { color: #c088cc; }
+  .step.bg-porte .text-block em { color: #cc8855; }
+  .assembly em { color: #cc8855; }
+  .content-finale em { color: #6b4a2a; }
+
+  .input-zone {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+    z-index: 1;
+  }
+
+  input[type="text"] {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #555;
+    color: #ddd;
+    font-family: 'Georgia', serif;
+    font-size: 1rem;
+    padding: 8px 16px;
+    text-align: center;
+    width: 350px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .bg-caverne input[type="text"]:focus { border-bottom-color: #7b2d8e; }
+  .bg-rituel input[type="text"]:focus { border-bottom-color: #ff4500; }
+  .bg-reve input[type="text"]:focus { border-bottom-color: #7b2d8e; }
+  .bg-porte input[type="text"]:focus { border-bottom-color: #ff4500; }
+  .bg-monde input[type="text"]:focus { border-bottom-color: #8b4513; }
+  .bg-monde input[type="text"] { color: #333; border-bottom-color: #999; }
+
+  button {
+    background: transparent;
+    border: 1px solid #555;
+    color: #aaa;
+    font-family: 'Georgia', serif;
+    font-size: 0.95rem;
+    padding: 10px 30px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  button:hover { border-color: #ff4500; color: #ddd; }
+
+  .error-msg {
+    font-style: italic;
+    font-size: 0.9rem;
+    min-height: 24px;
+  }
+
+  .bg-caverne .error-msg { color: #5a1a6e; }
+  .bg-rituel .error-msg { color: #cc3300; }
+  .bg-reve .error-msg { color: #5a1a6e; }
+  .bg-porte .error-msg { color: #cc3300; }
+
+  .letter-reveal {
+    display: none;
+    font-size: 3rem;
+    margin-top: 30px;
+    z-index: 1;
+  }
+
+  .letter-reveal.show {
+    display: block;
+    animation: letterBurn 2s ease-in forwards;
+  }
+
+  .step.bg-rituel .letter-reveal {
+    color: #ff4500;
+    text-shadow: 0 0 30px #ff4500, 0 0 60px #cc3300;
+  }
+
+  .step.bg-reve .letter-reveal {
+    color: #7b2d8e;
+    text-shadow: 0 0 30px #7b2d8e, 0 0 60px #5a1a6e;
+  }
+
+  @keyframes letterBurn {
+    0% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  .next-text {
+    display: none;
+    margin-top: 20px;
+    font-style: italic;
+    color: #999;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: color 0.3s;
+    z-index: 1;
+  }
+
+  .next-text.show { display: block; }
+  .next-text:hover { color: #ff4500; }
+
+  /* Flash transition */
+  .flash-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: white;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transition: opacity 0.3s;
+  }
+
+  .flash-overlay.active {
+    animation: flashAnim 1.5s ease-out forwards;
+  }
+
+  @keyframes flashAnim {
+    0% { opacity: 0; }
+    10% { opacity: 0.7; }
+    100% { opacity: 0; }
+  }
+</style>
+</head>
+<body class="bg-caverne">
+
+<div class="flash-overlay" id="flash"></div>
+<div class="lava-border" id="lavaBorder"></div>
+
+<!-- ==================== ETAPE 1 — La Caverne ==================== -->
+<div class="step bg-caverne active" id="step1">
+  <div class="eyes-container">
+    <div class="eye" id="eyeL"></div>
+    <div class="eye" id="eyeR"></div>
+  </div>
+
+  <div class="text-block">
+    <em>Avant les yeux pourpres, avant les montagnes, avant l'océan —</em><br>
+    <em>il y avait un seuil.</em><br><br>
+    <em>Où as-tu été déposé, enfant de cendres ?</em><br>
+    <em>Donne le nom complet du lieu.</em>
+  </div>
+
+  <div class="input-zone">
+    <input type="text" id="ans1" placeholder="..." autocomplete="off">
+    <button onclick="check1()">Avancer</button>
+    <div class="error-msg" id="err1"></div>
+  </div>
+</div>
+
+<!-- ==================== ETAPE 2 — Le Rituel ==================== -->
+<div class="step bg-rituel" id="step2">
+  <div class="text-block">
+    <em>Un nom fut prononcé une seule fois.</em><br>
+    <em>Tu ne t'en souviens plus. Mais tu te souviens de ce qu'il t'a enseigné.</em><br><br>
+    <em>Par la seule force de ta dévotion, tu as appris quelque chose</em><br>
+    <em>que peu de mortels maîtrisent.</em><br><br>
+    <em>Quelle langue parles-tu que tes frères ne parlent pas ?</em>
+  </div>
+
+  <div class="input-zone" id="input2">
+    <input type="text" id="ans2" placeholder="..." autocomplete="off">
+    <button onclick="check2()">Répondre</button>
+    <div class="error-msg" id="err2"></div>
+  </div>
+
+  <div class="letter-reveal" id="letter1">D</div>
+  <div class="next-text" id="next2" onclick="goStep(3)">
+    Retiens cette lettre. Avance. &#8594;
+  </div>
+</div>
+
+<!-- ==================== ETAPE 3 — Le Rêve ==================== -->
+<div class="step bg-reve" id="step3">
+  <div class="braziers">
+    <div class="brazier"></div>
+    <div class="brazier"></div>
+  </div>
+
+  <div class="text-block">
+    <em>La présence t'a transmis une seule chose. Tu l'as oubliée.</em><br>
+    <em>Mais ton corps, lui, s'en souvient.</em><br><br>
+    <em>Quand tu t'es réveillé, qu'est-ce qui avait changé ?</em><br>
+    <em>Choisis les deux bonnes réponses.</em>
+  </div>
+
+  <div class="checkbox-zone" id="cbZone">
+    <label><input type="checkbox" value="wrong1"> Ses cheveux sont devenus blancs</label>
+    <label><input type="checkbox" value="pourpre"> Ses yeux sont devenus pourpres</label>
+    <label><input type="checkbox" value="wrong2"> Sa peau s'est couverte d'écailles</label>
+    <label><input type="checkbox" value="fendus"> Ses pupilles se sont fendues verticalement</label>
+    <label><input type="checkbox" value="wrong3"> Des cornes ont poussé sur son front</label>
+    <label><input type="checkbox" value="wrong4"> Sa voix a changé de timbre</label>
+  </div>
+
+  <div class="input-zone" id="btn3">
+    <button onclick="check3()">Répondre</button>
+    <div class="error-msg" id="err3"></div>
+  </div>
+
+  <div class="letter-reveal" id="letter2">B</div>
+  <div class="next-text" id="next3" onclick="goStep(4)">
+    Une deuxième lettre. Retiens-la. Avance. &#8594;
+  </div>
+</div>
+
+<!-- ==================== ETAPE 4 — La Porte ==================== -->
+<div class="step bg-porte" id="step4">
+  <div class="text-block">
+    <em>Tu as quitté la chaleur.</em><br>
+    <em>Le monde est vaste, bruyant, cruel parfois.</em><br><br>
+    <em>Sous la pression, ton corps trahit ce qu'il contient.</em><br>
+    <em>Qu'irradies-tu malgré toi quand tes émotions débordent ?</em>
+  </div>
+
+  <div class="input-zone" id="input4a">
+    <input type="text" id="ans4a" placeholder="..." autocomplete="off">
+    <button onclick="check4a()">Répondre</button>
+    <div class="error-msg" id="err4a"></div>
+  </div>
+
+  <div class="assembly" id="assembly">
+    <em>Bien.</em><br><br>
+    <em>Assemble ce que la caverne t'a donné.</em><br>
+    <em>Les deux lettres, puis ce dernier mot.</em><br>
+    <em>Sans espace, sans majuscule.</em>
+
+    <div class="input-zone">
+      <input type="text" id="ans4b" placeholder="..." autocomplete="off">
+      <button onclick="check4b()">Ouvrir la porte</button>
+      <div class="error-msg" id="err4b"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ETAPE 5 — Le Monde ==================== -->
+<div class="step bg-monde" id="step5">
+  <div class="skyline">
+    <div class="building" style="height:60px;"></div>
+    <div class="building" style="height:85px;"></div>
+    <div class="building" style="height:45px;"></div>
+    <div class="building" style="height:95px;"></div>
+    <div class="building" style="height:70px;"></div>
+    <div class="building" style="height:55px;"></div>
+    <div class="building" style="height:110px;"></div>
+    <div class="building" style="height:40px;"></div>
+    <div class="building" style="height:80px;"></div>
+    <div class="building" style="height:65px;"></div>
+    <div class="building" style="height:90px;"></div>
+    <div class="building" style="height:50px;"></div>
+  </div>
+
+  <div class="text-block content-finale">
+    <em>Cela fait trois jours que tu es arrivé en ville.</em><br>
+    <em>Tu n'as pas encore osé pousser la porte.</em><br><br>
+    <em>Aujourd'hui, tu la pousses.</em>
+  </div>
+
+  <div class="credentials">
+    <h3>Tes clés pour ce monde</h3>
+    <!-- REMPLACE ICI PAR LES VRAIS IDENTIFIANTS -->
+    <div class="cred-line">Login : <span>Al'Kalir </span></div>
+    <div class="cred-line">Mot de passe : <span>MDP_FOUNDRY</span></div>
+  </div>
+</div>
+
+<script>
+function normalize(str) {
+  return str.toLowerCase().trim()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z ]/g, "");
+}
+
+function goStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  const step = document.getElementById('step' + n);
+  step.classList.add('active');
+
+  // Mettre à jour le background du body
+  const bgClass = step.className.split(' ').find(c => c.startsWith('bg-'));
+  document.body.className = bgClass;
+
+  // Lava border uniquement pour étape 2
+  document.getElementById('lavaBorder').classList.toggle('active', n === 2);
+
+  window.scrollTo(0, 0);
+}
+
+function flashAndGo(n) {
+  const flash = document.getElementById('flash');
+  flash.classList.add('active');
+  setTimeout(() => {
+    flash.classList.remove('active');
+    goStep(n);
+  }, 1500);
+}
+
+// === ETAPE 1 ===
+function check1() {
+  const input = normalize(document.getElementById('ans1').value);
+  const valid = [
+    "monastere de la braise eternelle",
+    "le monastere de la braise eternelle"
+  ];
+  if (valid.includes(input)) {
+    flashAndGo(2);
+  } else {
+    document.querySelectorAll('.eye').forEach(e => {
+      e.classList.add('shake');
+      setTimeout(() => e.classList.remove('shake'), 1200);
+    });
+    document.getElementById('err1').textContent = "La chaleur reflue. Cherche dans tes souvenirs.";
+  }
+}
+
+// === ETAPE 2 ===
+function check2() {
+  const input = normalize(document.getElementById('ans2').value).replace(/ /g, '');
+  const valid = ["draconique", "draconic", "draconien", "draconian"];
+  if (valid.includes(input)) {
+    document.getElementById('input2').style.display = 'none';
+    document.getElementById('letter1').classList.add('show');
+    setTimeout(() => document.getElementById('next2').classList.add('show'), 2000);
+  } else {
+    document.getElementById('err2').textContent = "Ce n'est pas la bonne langue. Réfléchis.";
+  }
+}
+
+// === ETAPE 3 ===
+function check3() {
+  const checked = document.querySelectorAll('#cbZone input[type="checkbox"]:checked');
+  const values = Array.from(checked).map(cb => cb.value).sort();
+
+  if (values.length !== 2) {
+    document.getElementById('err3').textContent = "Deux réponses. Ni plus, ni moins.";
+    return;
+  }
+
+  if (values[0] === "fendus" && values[1] === "pourpre") {
+    document.getElementById('cbZone').style.display = 'none';
+    document.getElementById('btn3').style.display = 'none';
+    document.getElementById('letter2').classList.add('show');
+    setTimeout(() => document.getElementById('next3').classList.add('show'), 2000);
+  } else {
+    document.getElementById('err3').textContent = "Les brasiers vacillent. Ce n'est pas ce qui a changé.";
+  }
+}
+
+// === ETAPE 4 ===
+function check4a() {
+  const input = normalize(document.getElementById('ans4a').value).replace(/ /g, '');
+  const valid = ["chaleur", "feu", "flammes", "flamme", "heat"];
+  if (valid.includes(input)) {
+    document.getElementById('input4a').style.display = 'none';
+    document.getElementById('assembly').classList.add('show');
+  } else {
+    document.getElementById('err4a').textContent = "Le monde frissonne. Ce n'est pas le bon mot.";
+  }
+}
+
+function check4b() {
+  const input = document.getElementById('ans4b').value.toLowerCase().trim();
+  if (input === "dbchaleur") {
+    flashAndGo(5);
+  } else {
+    document.getElementById('err4b').textContent = "La porte résiste. Réessaie.";
+  }
+}
+
+// Enter key support
+document.addEventListener('keypress', function(e) {
+  if (e.key !== 'Enter') return;
+  const active = document.querySelector('.step.active');
+  if (!active) return;
+  const id = active.id;
+  if (id === 'step1') check1();
+  else if (id === 'step2') check2();
+  else if (id === 'step4') {
+    if (document.getElementById('assembly').classList.contains('show')) check4b();
+    else check4a();
+  }
+});
+</script>
+
+</body>
+</html>

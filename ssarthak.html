@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le Seuil</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Georgia', serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    overflow: hidden;
+    transition: background 2s ease;
+  }
+
+  .step {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    width: 100%;
+    padding: 40px 20px;
+  }
+
+  .step.active {
+    display: flex;
+    animation: fadeIn 2s ease-in forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ===== ETAPE 1 — Le Marais ===== */
+  .bg-marais {
+    background: linear-gradient(to bottom, #1a2a15 0%, #2a3520 40%, #1f2b18 100%);
+    color: #c4b89a;
+  }
+
+  .fog {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 150px;
+    background: linear-gradient(to top, rgba(180,170,130,0.15), transparent);
+    pointer-events: none;
+    z-index: 0;
+    animation: fogDrift 8s ease-in-out infinite alternate;
+  }
+
+  @keyframes fogDrift {
+    0% { transform: translateX(-20px); opacity: 0.6; }
+    100% { transform: translateX(20px); opacity: 0.3; }
+  }
+
+  .amber-dots {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .amber-dot {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: #c8a84e;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #c8a84e, 0 0 20px rgba(200,168,78,0.3);
+    animation: amberFloat 6s ease-in-out infinite;
+  }
+
+  .amber-dot:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
+  .amber-dot:nth-child(2) { top: 60%; left: 80%; animation-delay: 1.5s; }
+  .amber-dot:nth-child(3) { top: 40%; left: 50%; animation-delay: 3s; }
+  .amber-dot:nth-child(4) { top: 75%; left: 25%; animation-delay: 0.8s; }
+  .amber-dot:nth-child(5) { top: 30%; left: 70%; animation-delay: 2.2s; }
+
+  @keyframes amberFloat {
+    0%, 100% { transform: translateY(0); opacity: 0.5; }
+    50% { transform: translateY(-15px); opacity: 1; }
+  }
+
+  /* ===== ETAPE 2 — La Table ===== */
+  .bg-table {
+    background: #0a0a0a;
+    color: #b0b0a0;
+  }
+
+  .necro-pulse {
+    position: fixed;
+    top: 50%; left: 50%;
+    width: 300px; height: 300px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(50,180,80,0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    animation: necroPulse 4s ease-in-out infinite;
+  }
+
+  @keyframes necroPulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.4; }
+    50% { transform: translate(-50%, -50%) scale(1.4); opacity: 0.8; }
+  }
+
+  /* ===== ETAPE 3 — Le Seuil ===== */
+  .bg-seuil {
+    background: #050505;
+    color: #a8a0b0;
+  }
+
+  .seuil-glow {
+    position: fixed;
+    top: 50%; left: 50%;
+    width: 200px; height: 200px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(100,50,120,0.1) 0%, rgba(50,180,80,0.05) 50%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    animation: seuilGlow 5s ease-in-out infinite alternate;
+  }
+
+  @keyframes seuilGlow {
+    0% { box-shadow: 0 0 60px rgba(100,50,120,0.15); }
+    100% { box-shadow: 0 0 100px rgba(50,180,80,0.15); }
+  }
+
+  /* ===== ETAPE 4 — L'Exil ===== */
+  .bg-exil {
+    background: linear-gradient(to bottom, #0a0a0a 0%, #2a2a28 100%);
+    color: #aaa89a;
+  }
+
+  /* ===== ETAPE 5 — Le Monde ===== */
+  .bg-monde {
+    background: linear-gradient(to bottom, #2a2a28 0%, #4a4540 40%, #6a6055 100%);
+    color: #3a3530;
+  }
+
+  .skyline {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 100px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 8px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .building {
+    background: rgba(40,35,30,0.35);
+    width: 28px;
+    border-radius: 2px 2px 0 0;
+  }
+
+  .credentials {
+    margin-top: 40px;
+    padding: 25px 40px;
+    border: 1px solid rgba(80,75,65,0.4);
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(4px);
+    border-radius: 8px;
+    text-align: center;
+    z-index: 1;
+  }
+
+  .credentials h3 {
+    font-size: 1rem;
+    color: #6a6055;
+    margin-bottom: 15px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .cred-line {
+    font-size: 1rem;
+    margin: 8px 0;
+  }
+
+  .cred-line span {
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    background: rgba(100,90,80,0.15);
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+
+  /* ===== COMMUN ===== */
+  .text-block {
+    max-width: 600px;
+    text-align: center;
+    line-height: 1.8;
+    font-size: 1.1rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .text-block em { font-style: italic; }
+  .bg-marais .text-block em { color: #c8a84e; }
+  .bg-table .text-block em { color: #55aa66; }
+  .bg-seuil .text-block em { color: #9070a0; }
+  .bg-exil .text-block em { color: #8a8575; }
+  .content-finale em { color: #5a5550; }
+
+  .input-zone {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+    z-index: 1;
+  }
+
+  input[type="text"] {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #555;
+    color: #ddd;
+    font-family: 'Georgia', serif;
+    font-size: 1rem;
+    padding: 8px 16px;
+    text-align: center;
+    width: 350px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .bg-marais input[type="text"]:focus { border-bottom-color: #c8a84e; }
+  .bg-table input[type="text"]:focus { border-bottom-color: #55aa66; }
+  .bg-seuil input[type="text"]:focus { border-bottom-color: #9070a0; }
+  .bg-exil input[type="text"]:focus { border-bottom-color: #8a8575; }
+
+  button {
+    background: transparent;
+    border: 1px solid #555;
+    color: #aaa;
+    font-family: 'Georgia', serif;
+    font-size: 0.95rem;
+    padding: 10px 30px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  button:hover { border-color: #55aa66; color: #ddd; }
+
+  .error-msg {
+    font-style: italic;
+    font-size: 0.9rem;
+    min-height: 24px;
+  }
+
+  .bg-marais .error-msg { color: #7a6a30; }
+  .bg-table .error-msg { color: #2a7a3a; }
+  .bg-seuil .error-msg { color: #6a4a7a; }
+  .bg-exil .error-msg { color: #6a6555; }
+
+  /* Radio buttons */
+  .radio-zone {
+    margin-top: 35px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    z-index: 1;
+  }
+
+  .radio-zone label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+    color: #a8a0b0;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+
+  .radio-zone label:hover { color: #d0c8d8; }
+
+  input[type="radio"] {
+    accent-color: #9070a0;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+
+  /* Letter reveal */
+  .letter-reveal {
+    display: none;
+    font-size: 3rem;
+    margin-top: 30px;
+    z-index: 1;
+  }
+
+  .letter-reveal.show {
+    display: block;
+    animation: letterBurn 2s ease-in forwards;
+  }
+
+  .bg-table .letter-reveal {
+    color: #55aa66;
+    text-shadow: 0 0 30px #55aa66, 0 0 60px #2a7a3a;
+  }
+
+  .bg-seuil .letter-reveal {
+    color: #9070a0;
+    text-shadow: 0 0 30px #9070a0, 0 0 60px #6a4a7a;
+  }
+
+  @keyframes letterBurn {
+    0% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  .next-text {
+    display: none;
+    margin-top: 20px;
+    font-style: italic;
+    color: #777;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: color 0.3s;
+    z-index: 1;
+  }
+
+  .next-text.show { display: block; }
+  .next-text:hover { color: #55aa66; }
+
+  .assembly {
+    display: none;
+    margin-top: 40px;
+    text-align: center;
+    max-width: 550px;
+    line-height: 1.8;
+    z-index: 1;
+  }
+
+  .assembly.show { display: block; }
+  .assembly em { color: #8a8575; }
+
+  .flash-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  .flash-overlay.active-green {
+    animation: flashGreen 1.5s ease-out forwards;
+  }
+
+  .flash-overlay.active-white {
+    animation: flashWhite 1.5s ease-out forwards;
+  }
+
+  @keyframes flashGreen {
+    0% { opacity: 0; background: #1a3a1a; }
+    10% { opacity: 0.6; }
+    100% { opacity: 0; }
+  }
+
+  @keyframes flashWhite {
+    0% { opacity: 0; background: #ddd; }
+    10% { opacity: 0.5; }
+    100% { opacity: 0; }
+  }
+
+  .voice-text {
+    display: none;
+    margin-top: 30px;
+    font-style: italic;
+    font-size: 1.05rem;
+    text-align: center;
+    max-width: 500px;
+    line-height: 1.8;
+    z-index: 1;
+  }
+
+  .voice-text.show {
+    display: block;
+    animation: fadeIn 3s ease-in forwards;
+  }
+
+  .bg-table .voice-text { color: #55aa66; }
+</style>
+</head>
+<body class="bg-marais">
+
+<div class="flash-overlay" id="flash"></div>
+
+<!-- Ambiance marais -->
+<div class="amber-dots" id="amberDots">
+  <div class="amber-dot"></div>
+  <div class="amber-dot"></div>
+  <div class="amber-dot"></div>
+  <div class="amber-dot"></div>
+  <div class="amber-dot"></div>
+</div>
+<div class="fog" id="fog"></div>
+
+<!-- Ambiance table -->
+<div class="necro-pulse" id="necroPulse" style="display:none;"></div>
+
+<!-- Ambiance seuil -->
+<div class="seuil-glow" id="seuilGlow" style="display:none;"></div>
+
+<!-- ==================== ETAPE 1 — Le Marais ==================== -->
+<div class="step bg-marais active" id="step1">
+  <div class="text-block">
+    <em>Avant le froid, avant le Seuil, avant le silence —</em><br>
+    <em>il y avait un clan.</em><br><br>
+    <em>Comment s'appelle ton peuple, Sans-Soleil ?</em><br>
+    <em>Donne le nom complet du clan.</em>
+  </div>
+
+  <div class="input-zone">
+    <input type="text" id="ans1" placeholder="..." autocomplete="off">
+    <button onclick="check1()">Avancer</button>
+    <div class="error-msg" id="err1"></div>
+  </div>
+</div>
+
+<!-- ==================== ETAPE 2 — La Table de Pierre ==================== -->
+<div class="step bg-table" id="step2">
+  <div class="text-block">
+    <em>Un mage vint dans les marais.</em><br>
+    <em>Il ne demandait pas — il prenait.</em><br><br>
+    <em>Quel était son nom complet ?</em>
+  </div>
+
+  <div class="input-zone" id="input2">
+    <input type="text" id="ans2" placeholder="..." autocomplete="off">
+    <button onclick="check2()">Répondre</button>
+    <div class="error-msg" id="err2"></div>
+  </div>
+
+  <div class="voice-text" id="voiceText">
+    "La mort est une serrure mal fermée.<br>Et toi, tu es devenu la clé."
+  </div>
+
+  <div class="letter-reveal" id="letter1">O</div>
+  <div class="next-text" id="next2" onclick="goStep(3)">
+    Retiens cette lettre. Avance. &#8594;
+  </div>
+</div>
+
+<!-- ==================== ETAPE 3 — Le Seuil ==================== -->
+<div class="step bg-seuil" id="step3">
+  <div class="text-block">
+    <em>L'énergie t'a traversé. Quelque chose s'est ouvert.</em><br>
+    <em>Depuis, tu portes un surnom.</em><br><br>
+    <em>Pourquoi t'appelle-t-on Sans-Soleil ?</em><br>
+    <em>Qu'as-tu perdu cette nuit-là ?</em>
+  </div>
+
+  <div class="radio-zone" id="radioZone">
+    <label><input type="radio" name="q3" value="wrong1"> La vue dans l'obscurité</label>
+    <label><input type="radio" name="q3" value="correct"> Toute sensation de chaleur</label>
+    <label><input type="radio" name="q3" value="wrong2"> La capacité de rêver</label>
+  </div>
+
+  <div class="input-zone" id="btn3">
+    <button onclick="check3()">Répondre</button>
+    <div class="error-msg" id="err3"></div>
+  </div>
+
+  <div class="letter-reveal" id="letter2">S</div>
+  <div class="next-text" id="next3" onclick="goStep(4)">
+    Une deuxième lettre. Retiens-la. Avance. &#8594;
+  </div>
+</div>
+
+<!-- ==================== ETAPE 4 — L'Exil ==================== -->
+<div class="step bg-exil" id="step4">
+  <div class="text-block">
+    <em>Le clan t'a banni.</em><br>
+    <em>Tu as emporté une seule chose dans un sac de cuir.</em><br><br>
+    <em>Qu'y a-t-il dedans ?</em><br>
+    <em>Donne le nom de celui que tu portes.</em>
+  </div>
+
+  <div class="input-zone" id="input4a">
+    <input type="text" id="ans4a" placeholder="..." autocomplete="off">
+    <button onclick="check4a()">Répondre</button>
+    <div class="error-msg" id="err4a"></div>
+  </div>
+
+  <div class="assembly" id="assembly">
+    <em>Tu portes ses os. Tu portes son nom.</em><br><br>
+    <em>Assemble ce que le Seuil t'a donné.</em><br>
+    <em>Les deux lettres, puis son nom.</em><br>
+    <em>Sans espace, sans majuscule.</em>
+
+    <div class="input-zone">
+      <input type="text" id="ans4b" placeholder="..." autocomplete="off">
+      <button onclick="check4b()">Ouvrir la porte</button>
+      <div class="error-msg" id="err4b"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ETAPE 5 — Le Monde ==================== -->
+<div class="step bg-monde" id="step5">
+  <div class="skyline">
+    <div class="building" style="height:50px;"></div>
+    <div class="building" style="height:75px;"></div>
+    <div class="building" style="height:40px;"></div>
+    <div class="building" style="height:85px;"></div>
+    <div class="building" style="height:60px;"></div>
+    <div class="building" style="height:45px;"></div>
+    <div class="building" style="height:95px;"></div>
+    <div class="building" style="height:35px;"></div>
+    <div class="building" style="height:70px;"></div>
+    <div class="building" style="height:55px;"></div>
+  </div>
+
+  <div class="text-block content-finale">
+    <em>Le froid ne t'a pas quitté.</em><br>
+    <em>Mais tu marches encore.</em>
+  </div>
+
+  <div class="credentials">
+    <h3>Tes clés pour ce monde</h3>
+    <div class="cred-line">Login : <span>Ssarthak</span></div>
+    <div class="cred-line">Mot de passe : <span>MDP_Foundry</span></div>
+  </div>
+</div>
+
+<script>
+function normalize(str) {
+  return str.toLowerCase().trim()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z ]/g, "");
+}
+
+function hideAmbiance() {
+  document.getElementById('amberDots').style.display = 'none';
+  document.getElementById('fog').style.display = 'none';
+  document.getElementById('necroPulse').style.display = 'none';
+  document.getElementById('seuilGlow').style.display = 'none';
+}
+
+function goStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  const step = document.getElementById('step' + n);
+  step.classList.add('active');
+
+  const bgClass = step.className.split(' ').find(c => c.startsWith('bg-'));
+  document.body.className = bgClass;
+
+  hideAmbiance();
+  if (n === 1) {
+    document.getElementById('amberDots').style.display = 'block';
+    document.getElementById('fog').style.display = 'block';
+  } else if (n === 2) {
+    document.getElementById('necroPulse').style.display = 'block';
+  } else if (n === 3) {
+    document.getElementById('seuilGlow').style.display = 'block';
+  }
+
+  window.scrollTo(0, 0);
+}
+
+function flashAndGo(n, type) {
+  const flash = document.getElementById('flash');
+  flash.className = 'flash-overlay active-' + (type || 'green');
+  setTimeout(() => {
+    flash.className = 'flash-overlay';
+    goStep(n);
+  }, 1500);
+}
+
+// === ETAPE 1 ===
+function check1() {
+  const input = normalize(document.getElementById('ans1').value);
+  const valid = [
+    "griffe d ambre",
+    "la griffe d ambre",
+    "griffe dambre",
+    "la griffe dambre"
+  ];
+  if (valid.includes(input)) {
+    flashAndGo(2, 'green');
+  } else {
+    document.getElementById('err1').textContent = "La brume s'epaissit. Le marais ne te reconnait plus.";
+  }
+}
+
+// === ETAPE 2 ===
+function check2() {
+  const input = normalize(document.getElementById('ans2').value);
+  if (input === "qilas vana") {
+    document.getElementById('input2').style.display = 'none';
+    document.getElementById('voiceText').classList.add('show');
+    setTimeout(() => {
+      document.getElementById('letter1').classList.add('show');
+      setTimeout(() => document.getElementById('next2').classList.add('show'), 2000);
+    }, 3500);
+  } else {
+    document.getElementById('err2').textContent = "L'ombre se tait. Ce n'est pas le bon nom.";
+  }
+}
+
+// === ETAPE 3 ===
+function check3() {
+  const selected = document.querySelector('input[name="q3"]:checked');
+  if (!selected) {
+    document.getElementById('err3').textContent = "Choisis une reponse.";
+    return;
+  }
+  if (selected.value === "correct") {
+    document.getElementById('radioZone').style.display = 'none';
+    document.getElementById('btn3').style.display = 'none';
+    document.getElementById('letter2').classList.add('show');
+    setTimeout(() => document.getElementById('next3').classList.add('show'), 2000);
+  } else {
+    document.getElementById('err3').textContent = "Le Seuil grince. Ce n'est pas ce que tu as perdu.";
+  }
+}
+
+// === ETAPE 4 ===
+function check4a() {
+  const input = normalize(document.getElementById('ans4a').value).replace(/ /g, '');
+  const valid = ["kreth", "lesosdekreth", "osdekreth", "lososdekreth"];
+  if (valid.includes(input)) {
+    document.getElementById('input4a').style.display = 'none';
+    document.getElementById('assembly').classList.add('show');
+  } else {
+    document.getElementById('err4a').textContent = "Ce n'est pas ce que tu portes. Cherche encore.";
+  }
+}
+
+function check4b() {
+  const input = document.getElementById('ans4b').value.toLowerCase().trim();
+  if (input === "oskreth") {
+    flashAndGo(5, 'white');
+  } else {
+    document.getElementById('err4b').textContent = "La porte resiste. Reassemble.";
+  }
+}
+
+// Enter key
+document.addEventListener('keypress', function(e) {
+  if (e.key !== 'Enter') return;
+  const active = document.querySelector('.step.active');
+  if (!active) return;
+  const id = active.id;
+  if (id === 'step1') check1();
+  else if (id === 'step2') check2();
+  else if (id === 'step3') check3();
+  else if (id === 'step4') {
+    if (document.getElementById('assembly').classList.contains('show')) check4b();
+    else check4a();
+  }
+});
+</script>
+
+</body>
+</html>
