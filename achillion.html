@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le Coffre d'Achillion</title>
+<!--
+  =====================================================================
+  LE COFFRE D'ACHILLION - Vyrmhal
+  Le mot de passe n'est PAS stocké en clair. Il est chiffré (XOR) avec
+  une clé dérivée des six réponses canoniques.
+  POUR LE DÉFINIR : ouvrir cette page avec #forge au bout de l'URL,
+  taper le mot de passe, coller la ligne obtenue à la place de VAULT.
+  =====================================================================
+-->
+<style>
+  :root{
+    --bg:#06070b; --bg2:#0b0f18;
+    --ink:#e4e6ea; --muted:#7e8590;
+    --accent:#b9cedb; --line:#ffffff14; --err:#b8564a;
+    --tint:185,206,219;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+    --sans:Optima,Candara,"Gill Sans Nova","Gill Sans","Trebuchet MS",sans-serif;
+  }
+  *{box-sizing:border-box;border-radius:0 !important}
+  html,body{margin:0;padding:0;min-height:100%}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:var(--serif); font-size:16.5px; line-height:1.7;
+    overflow-x:hidden; letter-spacing:.004em;
+    transition:background-color 1.6s ease, color 1.6s ease;
+  }
+
+  /* ============ LES TROIS ACTES : la lumière change ============ */
+  /* I - Mer Austral : argent, froid, silence */
+  body[data-act="1"]{--bg:#05060a;--bg2:#0c1320;--accent:#b9cedb;--ink:#e4e8ee;--muted:#79828e;--tint:185,206,219}
+  /* II - Le sable rouge : lanternes vertes, braise, fer */
+  body[data-act="2"]{--bg:#090604;--bg2:#1c1007;--accent:#8fbb92;--ink:#e9ded0;--muted:#8a8071;--tint:143,187,146}
+  /* III - Le saule : or bas, feuilles, chaleur retenue */
+  body[data-act="3"]{--bg:#070a07;--bg2:#151c11;--accent:#d8b46b;--ink:#ede8d8;--muted:#8b8770;--tint:216,180,107}
+  /* Le coffre */
+  body[data-act="end"]{--bg:#04050a;--bg2:#182031;--accent:#eaf0f8;--ink:#f4f3ee;--muted:#8e97a6;--tint:234,240,248}
+
+  /* ============ FONDS ============ */
+  #bg{position:fixed;inset:0;z-index:-3;display:block}
+  #haze{
+    position:fixed;inset:-25%;z-index:-2;pointer-events:none;
+    background:
+      radial-gradient(34% 42% at 24% 16%, rgba(var(--tint),.15), transparent 72%),
+      radial-gradient(44% 36% at 78% 76%, rgba(var(--tint),.10), transparent 72%),
+      radial-gradient(70% 55% at 50% 112%, var(--bg2), transparent 74%);
+    animation:tide 46s ease-in-out infinite alternate, breath 11s ease-in-out infinite;
+    transition:background 1.6s ease;
+  }
+  /* la marée : lente, indifférente */
+  @keyframes tide{
+    0%  {transform:translate3d(-3%,-2%,0)}
+    50% {transform:translate3d(2%,3%,0)}
+    100%{transform:translate3d(4%,-3%,0)}
+  }
+  /* la respiration du moine : 4 temps dedans, 7 dehors */
+  @keyframes breath{0%,100%{opacity:.82}36%{opacity:1}}
+  #grain{
+    position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.045;
+    background-image:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px);
+    animation:scan 11s linear infinite;
+  }
+  @keyframes scan{from{transform:translateY(0)}to{transform:translateY(3px)}}
+
+  /* la bougie - un matelas, une bougie, un bol */
+  #candle{position:fixed;right:26px;bottom:24px;z-index:2;pointer-events:none;opacity:.5}
+  #candle .flame{width:3px;height:9px;background:var(--accent);margin:0 auto 3px;
+    box-shadow:0 0 12px 3px rgba(var(--tint),.55);animation:flicker 2.6s ease-in-out infinite}
+  #candle .wax{width:9px;height:26px;background:linear-gradient(180deg,rgba(var(--tint),.35),transparent);
+    border-left:1px solid var(--line);border-right:1px solid var(--line)}
+  @keyframes flicker{
+    0%,100%{transform:scaleY(1) translateX(0);opacity:.9}
+    23%{transform:scaleY(1.35) translateX(.6px);opacity:1}
+    47%{transform:scaleY(.8) translateX(-.5px);opacity:.62}
+    71%{transform:scaleY(1.15) translateX(.3px);opacity:.95}
+  }
+
+  /* ============ COLONNE ============ */
+  .wrap{max-width:640px;margin:0 auto;padding:9vh 22px 18vh;position:relative}
+  /* l'ossature - discipline, l'axe du corps */
+  @media(min-width:820px){
+    .wrap::before{content:"";position:absolute;left:-44px;top:9vh;bottom:18vh;width:1px;
+      background:linear-gradient(180deg,transparent,var(--line) 8%,var(--line) 92%,transparent)}
+  }
+
+  .orn{text-align:center;color:var(--accent);font-size:15px;letter-spacing:.7em;
+       opacity:.42;margin:0 0 22px;animation:pulse 11s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.2}36%{opacity:.6}}
+
+  h1{font-family:var(--sans);font-size:clamp(23px,5.4vw,34px);font-weight:300;
+     letter-spacing:.22em;text-align:center;margin:0 0 16px;text-transform:uppercase}
+  h1 span{display:inline-block;animation:settle 1.1s cubic-bezier(.16,.9,.24,1) both}
+  @keyframes settle{from{opacity:0;transform:translateY(-10px);filter:blur(5px)}
+                    to{opacity:1;transform:none;filter:blur(0)}}
+
+  .epigraph{
+    text-align:center;font-style:italic;color:var(--muted);font-size:14.5px;
+    max-width:400px;margin:0 auto 8px;animation:fadein 2s .9s both;line-height:1.75;
+  }
+  .epigraph cite{display:block;font-style:normal;font-family:var(--sans);font-size:10.5px;
+    letter-spacing:.32em;text-transform:uppercase;margin-top:10px;opacity:.7}
+  @keyframes fadein{from{opacity:0}to{opacity:1}}
+
+  /* ============ LES ENTAILLES (progression) ============ */
+  .track{display:flex;gap:13px;justify-content:center;margin:34px 0 40px;height:22px;align-items:center}
+  .track i{display:block;width:2px;height:20px;background:var(--line);position:relative;
+           transform:skewX(-9deg)}
+  .track i::after{content:"";position:absolute;inset:0;background:var(--accent);
+    transform:scaleY(0);transform-origin:top;transition:transform .8s cubic-bezier(.16,.9,.24,1)}
+  .track i.on::after{transform:scaleY(1)}
+
+  /* ============ ACTES ============ */
+  .act-band{text-align:center;padding:22px 0 24px;margin:0 0 34px;position:relative;
+    animation:wipe 1.2s cubic-bezier(.16,.9,.24,1) both}
+  .act-band::before,.act-band::after{content:"";position:absolute;left:22%;right:22%;height:1px;
+    background:linear-gradient(90deg,transparent,var(--line),transparent)}
+  .act-band::before{top:0} .act-band::after{bottom:0}
+  @keyframes wipe{from{clip-path:inset(0 100% 0 0);opacity:0}to{clip-path:inset(0 0 0 0);opacity:1}}
+  .act-band .n{display:block;font-family:var(--sans);font-size:10px;letter-spacing:.46em;
+    color:var(--accent);text-transform:uppercase;opacity:.75}
+  .act-band .t{display:block;font-size:20px;letter-spacing:.13em;margin-top:9px;font-style:italic}
+  .act-band .t b{display:inline-block;font-weight:400;animation:fadein .6s both}
+
+  /* ============ CELLULE (carte) ============ */
+  /* un matelas, une bougie, un bol : rien de superflu */
+  .card{
+    border:1px solid var(--line);background:rgba(255,255,255,.018);
+    padding:34px 30px;margin:0 0 26px;position:relative;
+    animation:rise .9s cubic-bezier(.16,.9,.24,1) both;
+  }
+  .card>.edge{position:absolute;top:-1px;left:0;height:1px;background:var(--accent);opacity:.75;
+    animation:draw 1.1s .25s cubic-bezier(.16,.9,.24,1) both}
+  @keyframes draw{from{width:0}to{width:56px}}
+  .card::before,.card::after{content:"";position:absolute;width:8px;height:8px;
+    border:1px solid var(--accent);opacity:.4}
+  .card::before{top:-1px;left:-1px;border-right:0;border-bottom:0}
+  .card::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+  @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+  .card.shake{animation:shake .45s cubic-bezier(.36,.07,.19,.97)}
+  @keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}
+                   30%,50%,70%{transform:translateX(-7px)}40%,60%{transform:translateX(7px)}}
+  .card.open{animation:strike .7s ease both}
+  @keyframes strike{0%{box-shadow:inset 0 0 0 0 rgba(var(--tint),.28),0 0 0 0 rgba(var(--tint),.45)}
+                    40%{box-shadow:inset 0 0 60px 0 rgba(var(--tint),.16),0 0 0 12px rgba(var(--tint),.12)}
+                    100%{box-shadow:inset 0 0 0 0 rgba(var(--tint),0),0 0 0 30px rgba(var(--tint),0)}}
+
+  .card h2{font-family:var(--sans);font-size:15px;font-weight:400;letter-spacing:.2em;
+    margin:0 0 6px;color:var(--accent);text-transform:uppercase}
+  .card .idx{font-family:var(--sans);font-size:10px;letter-spacing:.36em;color:var(--muted);
+    text-transform:uppercase;margin:0 0 24px;opacity:.8}
+  .card p{margin:0 0 14px}
+  .card em{color:#fff;font-style:italic;opacity:.92}
+
+  .verse{font-style:italic;color:#ded9cd;padding-left:20px;margin:22px 0;position:relative}
+  .verse::before{content:"";position:absolute;left:0;top:4px;bottom:4px;width:1px;background:var(--accent);opacity:.5}
+  .verse span{display:block;animation:fadein .6s both}
+
+  .cipher{
+    font-family:var(--sans);letter-spacing:.52em;font-size:clamp(17px,4.6vw,24px);
+    text-align:center;color:var(--accent);margin:28px 0;text-indent:.52em;font-weight:300;
+    text-shadow:0 0 22px rgba(var(--tint),.4);
+  }
+  .cipher b{font-weight:300;display:inline-block;animation:embers 5s ease-in-out infinite}
+  @keyframes embers{0%,100%{opacity:1}50%{opacity:.4}}
+
+  .shards{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin:24px 0}
+  .shard{border:1px solid var(--line);padding:9px 16px;letter-spacing:.26em;font-size:13.5px;
+    color:var(--accent);font-family:var(--sans);font-weight:300;
+    background:rgba(255,255,255,.03);animation:rise .7s both;transition:border-color .3s}
+  .shard:hover{border-color:var(--accent)}
+
+  table.grid{margin:24px auto;border-collapse:collapse;font-family:var(--sans);font-weight:300}
+  table.grid td,table.grid th{border:1px solid var(--line);padding:9px 14px;text-align:center;
+    font-size:14.5px;letter-spacing:.1em}
+  table.grid th{color:var(--muted);font-size:10px;letter-spacing:.24em;text-transform:uppercase}
+  table.grid td{color:var(--accent)}
+
+  .note{font-size:13.5px;color:var(--muted);padding-left:16px;margin:18px 0 0;position:relative;font-style:italic}
+  .note::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:1px;background:var(--line)}
+
+  /* ============ FORME ============ */
+  form{display:flex;gap:9px;margin-top:28px;flex-wrap:wrap}
+  input[type=text]{
+    flex:1 1 210px;min-width:0;background:rgba(0,0,0,.42);border:1px solid var(--line);
+    color:var(--ink);padding:14px 15px;font-family:var(--serif);font-size:16px;
+    letter-spacing:.08em;outline:none;transition:border-color .35s,box-shadow .35s;
+  }
+  input[type=text]::placeholder{color:var(--muted);opacity:.55;font-style:italic}
+  input[type=text]:focus{border-color:var(--accent);box-shadow:0 0 0 1px rgba(var(--tint),.22)}
+  input.wrong{border-color:var(--err);animation:redflash .55s ease}
+  @keyframes redflash{0%{background:rgba(184,86,74,.22)}100%{background:rgba(0,0,0,.42)}}
+  button{
+    background:transparent;border:1px solid var(--accent);color:var(--accent);
+    padding:14px 26px;font-family:var(--sans);font-size:11.5px;letter-spacing:.28em;font-weight:400;
+    text-transform:uppercase;cursor:pointer;transition:.35s cubic-bezier(.16,.9,.24,1);
+  }
+  button:hover{background:var(--accent);color:var(--bg);letter-spacing:.34em}
+  .ghost{border-color:var(--line);color:var(--muted);font-size:10.5px;padding:11px 16px;letter-spacing:.22em}
+  .ghost:hover{background:transparent;color:var(--accent);border-color:var(--accent);letter-spacing:.26em}
+
+  .msg{min-height:24px;margin-top:16px;font-size:14px;font-style:italic}
+  .msg.bad{color:var(--err);animation:rise .35s both}
+  .msg.hint{color:var(--muted);animation:rise .45s both}
+
+  /* ============ SERRURES OUVERTES ============ */
+  .done{opacity:.34;padding:17px 22px;animation:none;transition:opacity .4s}
+  .done:hover{opacity:.65}
+  .done h2{font-size:13px;margin:0;letter-spacing:.18em}
+  .done .idx{margin:4px 0 0}
+  .done .seal{color:var(--accent);font-family:var(--sans);font-size:10.5px;letter-spacing:.3em;
+    text-transform:uppercase;position:absolute;right:22px;top:50%;transform:translateY(-50%)}
+  .done>.edge{display:none}
+  .done>*:not(h2):not(.idx):not(.seal){display:none}
+
+  /* ============ LE COFFRE ============ */
+  .vault{text-align:center;padding:46px 24px}
+  .vault h2{font-size:16px}
+  .vault .pw{
+    font-family:var(--sans);font-weight:300;font-size:clamp(19px,5vw,30px);
+    letter-spacing:.2em;color:var(--accent);word-break:break-all;
+    border:1px solid var(--accent);padding:24px;margin:30px 0;background:rgba(255,255,255,.05);
+    position:relative;overflow:hidden;animation:reveal 1.7s cubic-bezier(.16,.9,.24,1) both;
+    text-shadow:0 0 28px rgba(var(--tint),.6);
+  }
+  @keyframes reveal{from{clip-path:inset(0 0 100% 0);opacity:0}to{clip-path:inset(0 0 0 0);opacity:1}}
+  .vault .pw::after{content:"";position:absolute;left:0;right:0;height:1px;background:var(--accent);
+    box-shadow:0 0 14px 2px rgba(var(--tint),.7);animation:sweep 2.6s ease-in-out 1 both}
+  @keyframes sweep{0%{top:0;opacity:1}100%{top:100%;opacity:0}}
+
+  footer{text-align:center;color:var(--muted);font-family:var(--sans);font-size:10.5px;
+    letter-spacing:.34em;margin-top:72px;opacity:.4;text-transform:uppercase}
+  .forge label{display:block;font-family:var(--sans);font-size:10.5px;letter-spacing:.28em;
+    color:var(--muted);margin:22px 0 7px;text-transform:uppercase}
+  .forge textarea{width:100%;height:92px;background:rgba(0,0,0,.42);border:1px solid var(--line);
+    color:var(--ink);padding:13px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+  code{font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--accent);font-size:.9em}
+</style>
+</head>
+<body data-act="1">
+<canvas id="bg"></canvas>
+<div id="haze"></div>
+<div id="grain"></div>
+<div id="candle"><div class="flame"></div><div class="wax"></div></div>
+
+<div class="wrap">
+  <div id="head">
+    <p class="orn">❦</p>
+    <h1 id="title">Le Coffre d'Achillion</h1>
+    <p class="epigraph">« Il sauve son corps.<br>Il perd son âme à chaque aube. »
+      <cite>Six serrures avant l'aube</cite></p>
+    <div class="track" id="track"></div>
+  </div>
+  <div id="stage"></div>
+  <footer id="foot">Un matelas · Une bougie · Un bol</footer>
+</div>
+
+<script>
+"use strict";
+
+/* ================= COFFRE CHIFFRÉ (voir #forge) ================= */
+var VAULT = "IComTDE2WSIgPz8kQzREMCEjOjgsOw==";
+
+/* ================= NORMALISATION ================= */
+function norm(s){
+  return (s||"").toString().normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .toLowerCase().replace(/[^a-z0-9]/g,"");
+}
+
+/* ================= LES TROIS ACTES ================= */
+var ACTS = [
+  { n:"Acte Premier",  t:"Le Ciel qui s'est Fendu" },
+  { n:"Acte Deuxième", t:"Le Sable Rouge" },
+  { n:"Acte Troisième",t:"Ce qui Reste" }
+];
+
+/* ================= LES SIX SERRURES ================= */
+var RIDDLES = [
+{
+  act:1, title:"Le Miroir de l'Autre Rive", key:"meraustral",
+  accept:["meraustral","lameraustral","lameraustrale"],
+  seal:"Marée",
+  html:
+    `<p>Je n'ai ni rivage ni fond, et pourtant on me nomme une mer. Mes marées ne mouillent personne.
+     Chez moi, une pensée assez patiente finit par prendre corps, et l'on polit sa propre chair
+     comme on polirait une lame de lumière d'étoile.</p>
+     <p>Là-bas, tout se lit dans un miroir - <em>y compris ceci.</em></p>
+     <div class="cipher"><b>L</b><b>A</b><b>R</b><b>T</b><b>S</b><b>U</b><b>A</b><b>R</b><b>E</b><b>M</b></div>
+     <p class="note">Dix lettres d'un seul tenant. Rends-leur leur sens, puis coupe-les en deux mots.</p>`,
+  hints:[
+    "Lis la chaîne de droite à gauche.",
+    "Tu obtiens dix lettres qui forment deux mots : trois lettres, puis sept.",
+    "MER ________ : le foyer d'où tu es tombé, il y a six ans."
+  ]
+},
+{
+  act:1, title:"Les Quatre Éclats", key:"lanuitdesveines",
+  accept:["lanuitdesveines","nuitdesveines","lanuitdesveine"],
+  seal:"Déchirure",
+  html:
+    `<p>Une seule déchirure pourpre, et deux mondes qui basculent à la même seconde.
+     Toi, tu appelles cela une chute. Eux, ici, lui ont donné un nom - celui d'une nuit
+     où le ciel s'est strié comme un poignet trop fin.</p>
+     <p>Quatre éclats. Dans chacun, les lettres du mot ont été retournées, mêlées, jetées au hasard.
+     Reforme les quatre mots, puis remets les mots dans l'ordre.</p>
+     <div class="shards">
+       <span class="shard">S · E · D</span>
+       <span class="shard">V · N · E · I · S · E</span>
+       <span class="shard">A · L</span>
+       <span class="shard">T · I · U · N</span>
+     </div>
+     <p class="note">Quatre mots : 2, 4, 3 et 6 lettres - mais pas dans cet ordre-là.</p>`,
+  hints:[
+    "Les éclats te sont donnés dans le désordre. Le mot de deux lettres est un article : il vient en premier.",
+    "T·I·U·N donne un mot de quatre lettres qui suit l'article. V·N·E·I·S·E est le dernier.",
+    "LA _____ DES ______ : ce que les Vyrmhaliens ont vu dans le ciel, la nuit même de ta chute."
+  ]
+},
+{
+  act:2, title:"Le Champion Voilé", key:"kharon",
+  accept:["kharon","kharonlevoile","kharonlevoilé"],
+  seal:"Fer chaud",
+  html:
+    `<p>Peau huileuse sous les torches. Des membres qui se désarticulent comme ceux d'un céphalopode.
+     Envoyé par les capitaines d'<em>Écume-Noire</em>, il t'a laissé pour mort sur le sable de
+     l'Amphithéâtre - et c'est cette nuit-là que tout le reste a commencé.</p>
+     <p>Son nom a été voilé par ceux qui l'ont envoyé. Chaque lettre de son nom a été
+     <em>avancée</em> dans l'alphabet d'autant de rangs que la lettre correspondante du mot
+     <em>ÉCUME</em>, répété : A avance de 0, B de 1, C de 2, et ainsi de suite jusqu'à Z.</p>
+     <table class="grid">
+       <tr><th>voilé</th><td>O</td><td>J</td><td>U</td><td>D</td><td>S</td><td>R</td></tr>
+       <tr><th>écume</th><td>E</td><td>C</td><td>U</td><td>M</td><td>E</td><td>E</td></tr>
+       <tr><th>vrai</th><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td><td>?</td></tr>
+     </table>
+     <p class="note">Fais reculer chaque lettre du haut d'autant de rangs que celle du milieu. Six lettres.</p>`,
+  hints:[
+    "E vaut 4. Recule donc le O de 4 rangs : O → N → M → L → K. La première lettre est K.",
+    "C vaut 2 : J recule de deux → H. U vaut 20 : U recule de vingt et repasse par la fin de l'alphabet → A.",
+    "K, H, A, puis M vaut 12 : D recule de douze en repassant par Z → R. Le nom commence par KHAR…"
+  ]
+},
+{
+  act:2, title:"Les Lanternes Vertes", key:"sylas",
+  accept:["sylas","sylasvalerius","valerius"],
+  seal:"Registre",
+  html:
+    `<p>Une salle voûtée sous la ville, éclairée de vert. Un homme aux mains propres, toujours assis,
+     qui sourit sans que le sourire monte jamais jusqu'aux yeux. De l'or chaque mois, sans faute -
+     à condition que tu combattes.</p>
+     <p>Cinq lanternes brûlent au-dessus de son fauteuil. Chacune en compte une lettre :
+     <em>son rang dans l'alphabet.</em></p>
+     <div class="cipher"><b>19</b> · <b>25</b> · <b>12</b> · <b>1</b> · <b>19</b></div>
+     <p class="note">A vaut 1, B vaut 2, et ainsi de suite. Cinq lettres. Un nom.</p>`,
+  hints:[
+    "Compte l'alphabet sur tes doigts : A=1, B=2, C=3… La quatrième lanterne vaut 1, donc A.",
+    "19 tombe sur S. 25 tombe sur Y. Les deux lanternes extérieures portent la même lettre.",
+    "S _ _ A S - c'est celui qui tient ton pacte."
+  ]
+},
+{
+  act:3, title:"Le Saule et le Mouchoir", key:"papillon",
+  accept:["papillon","lepapillon","papillonnacre"],
+  seal:"Nacre",
+  html:
+    `<p>Huit vers. Prends la première lettre de chacun, de haut en bas.</p>
+     <p>Elles ne se sont pas posées dans l'ordre - <em>lui non plus ne s'est jamais posé où on l'attendait.</em>
+     Remets-les en vol.</p>
+     <div class="verse">
+       <span>Longtemps il chercha, sans jamais poser de question,</span>
+       <span>Aucune bouche ne dit son nom - seulement l'arbre.</span>
+       <span>Puis la marchande de fleurs parla à sa voisine,</span>
+       <span>Il entendit, et cela lui suffit.</span>
+       <span>Nul tissu ne fut jamais lavé avec autant de soin.</span>
+       <span>Posé sur son épaule, l'obstiné refusa de partir.</span>
+       <span>On dit qu'ils ne choisissent pas leurs amis - celui-là, si.</span>
+       <span>Léger, il fut le seul témoin de son premier vrai rire.</span>
+     </div>
+     <p class="note">Huit lettres à replacer. Un seul mot possible.</p>`,
+  hints:[
+    "Les initiales donnent L·A·P·I·N·P·O·L. Ce n'est pas un mot : c'est un désordre.",
+    "Deux P, deux L, un A, un I, un N, un O. Huit lettres. Il volait autour du saule.",
+    "Il s'est posé sur ton épaule et a refusé d'en partir."
+  ]
+},
+{
+  act:3, title:"Le Nom que tu ne Prononces Jamais", key:"lyra",
+  accept:["lyra"],
+  seal:"Le seuil",
+  html:
+    `<p>Six ans de chute. Une arène. Un pacte. Un mensonge prêt sur les lèvres,
+     chaque soir, avant de franchir une porte.</p>
+     <p>Tout cela ne tient qu'à un seul nom. Quatre lettres - une par ligne.</p>
+     <div class="verse">
+       <span>La première est la douzième de l'alphabet.</span>
+       <span>La deuxième est la seule lettre que l'on dise <em>grecque</em>.</span>
+       <span>La troisième ouvre le mot que Sylas referme sur toi chaque mois : le <em>Registre</em>.</span>
+       <span>La quatrième est la première de toutes - et la dernière chose qu'il te reste.</span>
+     </div>
+     <p class="note">Dis-le ici. Une fois.</p>`,
+  hints:[
+    "A, B, C… compte jusqu'à douze pour la première lettre.",
+    "En France, on appelle une lettre « i grec ». Registre commence par R.",
+    "L, puis la lettre grecque, puis R, puis la première de l'alphabet."
+  ]
+}
+];
+
+/* ================= CHIFFREMENT DU COFFRE ================= */
+function b64ToBytes(b64){var raw=atob(b64),o=[];for(var i=0;i<raw.length;i++)o.push(raw.charCodeAt(i));return o;}
+function bytesToB64(b){var s="";for(var i=0;i<b.length;i++)s+=String.fromCharCode(b[i]);return btoa(s);}
+function keyString(){return RIDDLES.map(function(r){return r.key;}).join("");}
+function xorBytes(b,k){var o=[];for(var i=0;i<b.length;i++)o.push(b[i]^k.charCodeAt(i%k.length));return o;}
+function utf8Encode(str){
+  var esc=encodeURIComponent(str),o=[];
+  for(var i=0;i<esc.length;i++){
+    if(esc[i]==="%"){o.push(parseInt(esc.substr(i+1,2),16));i+=2;}
+    else o.push(esc.charCodeAt(i));
+  }
+  return o;
+}
+function utf8Decode(b){
+  var esc="";
+  for(var i=0;i<b.length;i++){
+    var c=b[i];
+    esc += (c<128 && c!==37) ? String.fromCharCode(c) : "%"+("0"+c.toString(16)).slice(-2);
+  }
+  try{return decodeURIComponent(esc);}catch(e){return esc;}
+}
+function sealVault(p){return bytesToB64(xorBytes(utf8Encode(p),keyString()));}
+function openVault(b64){try{return utf8Decode(xorBytes(b64ToBytes(b64),keyString()));}catch(e){return null;}}
+
+/* ================= LE CIEL (canvas) ================= */
+/* I : poussières astrales reliées par des lignes - la Mer Austral
+   II : braises qui montent du sable - l'Arène
+   III : pollen qui dérive - le saule
+   fin : convergence                                              */
+var CFG = {
+  "1":  {n:88, col:"185,206,219", vx:.05, vy:-.14, r:[.5,2.1], glow:22, wob:.22, tw:.85, link:112},
+  "2":  {n:120,col:"196,104,62",  vx:.11, vy:-.62, r:[.4,1.8], glow:15, wob:.6,  tw:1.9, link:0},
+  "3":  {n:62, col:"216,180,107", vx:.36, vy:.07,  r:[.7,2.6], glow:20, wob:1.2, tw:.65, link:0},
+  "end":{n:150,col:"234,240,248", vx:.03, vy:-.26, r:[.4,2.5], glow:30, wob:.18, tw:1.1, link:96}
+};
+var cvs=document.getElementById("bg"), ctx=cvs.getContext("2d");
+var parts=[], cfg=CFG["1"], W=0, H=0, t=0;
+
+function fit(){ W=cvs.width=innerWidth; H=cvs.height=innerHeight; }
+function mk(){
+  return {
+    x:Math.random()*W, y:Math.random()*H,
+    r:cfg.r[0]+Math.random()*(cfg.r[1]-cfg.r[0]),
+    vx:(Math.random()-.5)*2*cfg.vx,
+    vy:cfg.vy*(.55+Math.random()*.9),
+    ph:Math.random()*Math.PI*2,
+    a:.14+Math.random()*.6
+  };
+}
+function setField(act){
+  cfg = CFG[act] || CFG["1"];
+  if(parts.length>cfg.n) parts.length=cfg.n;
+  while(parts.length<cfg.n) parts.push(mk());
+  for(var i=0;i<parts.length;i++){
+    var p=parts[i];
+    p.vy=cfg.vy*(.55+Math.random()*.9);
+    p.vx=(Math.random()-.5)*2*cfg.vx;
+    p.r=cfg.r[0]+Math.random()*(cfg.r[1]-cfg.r[0]);
+  }
+}
+function loop(){
+  t+=.016;
+  ctx.clearRect(0,0,W,H);
+  var i,j,p,q,d;
+
+  /* les constellations - seulement sous le ciel astral */
+  if(cfg.link>0){
+    ctx.lineWidth=.5;
+    for(i=0;i<parts.length;i++){
+      for(j=i+1;j<parts.length;j++){
+        p=parts[i]; q=parts[j];
+        var dx=p.x-q.x, dy=p.y-q.y; d=dx*dx+dy*dy;
+        if(d < cfg.link*cfg.link){
+          var o=(1-Math.sqrt(d)/cfg.link)*.14;
+          ctx.strokeStyle="rgba("+cfg.col+","+o.toFixed(3)+")";
+          ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y); ctx.stroke();
+        }
+      }
+    }
+  }
+
+  for(i=0;i<parts.length;i++){
+    p=parts[i];
+    p.x += p.vx + Math.sin(t*cfg.tw + p.ph)*cfg.wob*.5;
+    p.y += p.vy;
+    if(p.y < -20){ p.y=H+10; p.x=Math.random()*W; }
+    if(p.y > H+20){ p.y=-10; p.x=Math.random()*W; }
+    if(p.x < -20) p.x=W+10;
+    if(p.x > W+20) p.x=-10;
+    var tw=.55+.45*Math.sin(t*cfg.tw*1.6+p.ph);
+    ctx.beginPath();
+    ctx.fillStyle="rgba("+cfg.col+","+(p.a*tw).toFixed(3)+")";
+    ctx.shadowBlur=cfg.glow; ctx.shadowColor="rgba("+cfg.col+",.5)";
+    ctx.arc(p.x,p.y,p.r,0,6.2832);
+    ctx.fill();
+  }
+  ctx.shadowBlur=0;
+  requestAnimationFrame(loop);
+}
+addEventListener("resize",fit);
+fit(); setField("1"); loop();
+
+/* ================= ÉTAT & RENDU ================= */
+var solved=0;
+var stage=document.getElementById("stage");
+var track=document.getElementById("track");
+
+(function animateTitle(){
+  var h=document.getElementById("title"), txt=h.textContent;
+  h.innerHTML="";
+  for(var i=0;i<txt.length;i++){
+    var s=document.createElement("span");
+    s.textContent = txt[i]===" " ? " " : txt[i];
+    s.style.animationDelay=(i*0.042)+"s";
+    h.appendChild(s);
+  }
+})();
+
+function drawTrack(){
+  track.innerHTML="";
+  for(var i=0;i<RIDDLES.length;i++){
+    var e=document.createElement("i");
+    track.appendChild(e);
+    if(i<solved) (function(el,d){setTimeout(function(){el.className="on";},70*d);})(e,i);
+  }
+}
+
+function typeTitle(el, txt){
+  el.innerHTML="";
+  for(var i=0;i<txt.length;i++){
+    var b=document.createElement("b");
+    b.textContent = txt[i]===" " ? " " : txt[i];
+    b.style.animationDelay=(0.3+i*0.03)+"s";
+    el.appendChild(b);
+  }
+}
+
+function render(){
+  var act = solved>=RIDDLES.length ? "end" : String(RIDDLES[solved].act);
+  document.body.dataset.act=act;
+  setField(act);
+  drawTrack();
+  stage.innerHTML="";
+
+  if(solved>=RIDDLES.length){ renderVault(); return; }
+
+  var cur = RIDDLES[solved].act;
+
+  RIDDLES.forEach(function(r,i){
+    if(i<solved && r.act===cur){
+      var d=document.createElement("div");
+      d.className="card done";
+      d.innerHTML='<h2>'+r.title+'</h2><p class="idx">serrure '+(i+1)+' · ouverte</p>'+
+                  '<span class="seal">'+r.seal+'</span>';
+      stage.appendChild(d);
+    }
+  });
+
+  if(solved===0 || RIDDLES[solved-1].act!==cur){
+    var meta=ACTS[cur-1];
+    var band=document.createElement("div");
+    band.className="act-band";
+    band.innerHTML='<span class="n">'+meta.n+'</span><span class="t"></span>';
+    stage.appendChild(band);
+    typeTitle(band.querySelector(".t"), meta.t);
+  }
+
+  var r=RIDDLES[solved];
+  var card=document.createElement("div");
+  card.className="card";
+  card.innerHTML =
+    '<span class="edge"></span>'+
+    '<h2>'+r.title+'</h2>'+
+    '<p class="idx">serrure '+(solved+1)+' sur '+RIDDLES.length+'</p>'+
+    r.html+
+    '<form autocomplete="off"><input type="text" id="ans" placeholder="ta réponse" spellcheck="false">'+
+    '<button type="submit">Ouvrir</button>'+
+    '<button type="button" class="ghost" id="hintbtn">Indice</button></form>'+
+    '<div class="msg" id="msg"></div>';
+  stage.appendChild(card);
+
+  var els=card.querySelectorAll(".verse span, .shard, .cipher b");
+  for(var i2=0;i2<els.length;i2++){
+    if(els[i2].parentNode.className==="cipher") els[i2].style.animationDelay=(i2*0.13)+"s";
+    else els[i2].style.animationDelay=(0.25+i2*0.11)+"s";
+  }
+
+  var tries=0, hint=0;
+  var msg=card.querySelector("#msg");
+  var input=card.querySelector("#ans");
+  setTimeout(function(){input.focus();},300);
+
+  card.querySelector("#hintbtn").onclick=function(){
+    msg.className="msg hint";
+    if(hint<r.hints.length){ msg.textContent="« "+r.hints[hint]+" »"; hint++; }
+    else msg.textContent="Il n'y a plus rien à te souffler. Relis-toi.";
+  };
+
+  card.querySelector("form").onsubmit=function(e){
+    e.preventDefault();
+    var v=norm(input.value);
+    if(!v) return;
+    if(r.accept.indexOf(v)!==-1){
+      card.classList.add("open");
+      msg.className="msg hint"; msg.textContent=r.seal;
+      input.disabled=true;
+      setTimeout(function(){ solved++; render(); window.scrollTo({top:0,behavior:"smooth"}); },820);
+    } else {
+      tries++;
+      card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
+      input.classList.remove("wrong"); void input.offsetWidth; input.classList.add("wrong");
+      msg.className="msg bad";
+      msg.textContent = tries<3 ? "La serrure ne bouge pas."
+                                : "La serrure ne bouge pas. (Un indice t'attend, si tu le veux.)";
+      input.select();
+    }
+  };
+}
+
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+
+function renderVault(){
+  var pw=openVault(VAULT);
+  var d=document.createElement("div");
+  d.className="card vault";
+  d.innerHTML=
+    '<p class="orn">❧</p>'+
+    '<h2>Le Coffre s\'ouvre</h2>'+
+    '<p style="color:var(--muted);font-style:italic;max-width:430px;margin:14px auto 0">'+
+      'La Mer Austral. La déchirure. Le champion voilé. Les lanternes vertes. Le papillon. '+
+      'Et le nom que tu ne prononces jamais.</p>'+
+    '<div class="pw">'+ (pw&&pw.length ? escapeHtml(pw) : "— coffre vide : le MJ doit forger la clé —") +'</div>'+
+    '<p style="color:var(--muted);font-size:13px;font-style:italic">Voilà ce qui t\'ouvre la table.</p>'+
+    '<p style="margin-top:34px"><button type="button" id="again">Refermer</button></p>';
+  stage.appendChild(d);
+  d.querySelector("#again").onclick=function(){ solved=0; render(); window.scrollTo({top:0}); };
+}
+
+/* ================= FORGE MJ (#forge) ================= */
+function renderForge(){
+  document.body.dataset.act="end"; setField("end");
+  document.getElementById("head").innerHTML=
+    '<p class="orn">❧</p><h1>Forge du Coffre</h1>'+
+    '<p class="epigraph">Écran MJ. Ne pas transmettre au joueur.</p>';
+  document.getElementById("foot").textContent="Retire #forge de l'URL pour revenir au site";
+  stage.innerHTML="";
+  var d=document.createElement("div");
+  d.className="card forge";
+  d.innerHTML=
+    '<span class="edge"></span>'+
+    '<h2>Chiffrer le mot de passe Foundry</h2>'+
+    '<p class="idx">clé dérivée des six réponses</p>'+
+    '<p>Tape le mot de passe, copie la ligne obtenue, puis remplace la ligne <code>var VAULT = …</code> '+
+    'en haut du script de ce fichier.</p>'+
+    '<form autocomplete="off"><input type="text" id="pin" placeholder="mot de passe Foundry" spellcheck="false">'+
+    '<button type="submit">Forger</button></form>'+
+    '<label>Ligne à coller</label><textarea id="out" readonly></textarea>'+
+    '<label>Vérification (déchiffrement)</label><div class="msg hint" id="check"></div>';
+  stage.appendChild(d);
+  d.querySelector("form").onsubmit=function(e){
+    e.preventDefault();
+    var v=d.querySelector("#pin").value;
+    if(!v) return;
+    var s=sealVault(v);
+    d.querySelector("#out").value='var VAULT = "'+s+'";';
+    d.querySelector("#check").textContent="→ "+openVault(s);
+  };
+}
+
+/* ================= BOOT ================= */
+if(location.hash.toLowerCase()==="#forge") renderForge(); else render();
+</script>
+</body>
+</html>
